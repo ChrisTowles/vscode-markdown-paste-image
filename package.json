@@ -2,7 +2,7 @@
   "publisher": "ChrisTowles",
   "name": "markdown-paste-image",
   "displayName": "Markdown Paste Image",
-  "version": "0.1.1",
+  "version": "0.0.1",
   "packageManager": "pnpm@7.5.0",
   "description": "Paste Image in markdown from clipboard",
   "author": "Chris Towles",
@@ -20,23 +20,126 @@
   ],
   "sideEffects": false,
   "main": "./dist/index.js",
-  "icon": "docs/images/icon.png",
+  "icon": "res/icon.png",
   "files": [
     "dist"
   ],
   "engines": {
-    "vscode": "^1.69.0"
+    "vscode": "^1.71.0"
   },
   "activationEvents": [
-    "onStartupFinished"
+    "onCommand:test1.helloWorld"
   ],
+  
   "contributes": {
-    "configuration": {
-      "properties": {
-        "description": "Rule toggles"
+    "commands": [
+      {
+        "command": "test1.helloWorld",
+        "title": "Paste Image"
       }
-    }
+    ]
   },
+  "TODO:activationEvents": [
+    "onCommand:extension.pasteImage"
+  ],
+  "TODO:contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Paste Image Configuration",
+      "properties": {
+        "pasteImage.path": {
+          "type": "string",
+          "default": "${currentFileDir}",
+          "description": "The destination to save image file.You can use variable ${currentFileDir} and ${projectRoot}. ${currentFileDir} will be replace by the path of directory that contain current editing file. ${projectRoot} will be replace by path of the project opened in vscode."
+        },
+        "pasteImage.basePath": {
+          "type": "string",
+          "default": "${currentFileDir}",
+          "description": "The base path of image url.You can use variable ${currentFileDir} and ${projectRoot}. ${currentFileDir} will be replace by the path of directory that contain current editing file. ${projectRoot} will be replace by path of the project opened in vscode. If you set basePath to empty String, it will insert absolute path to file."
+        },
+        "pasteImage.forceUnixStyleSeparator": {
+          "type": "boolean",
+          "default": true,
+          "description": "Force set the file separator style to unix style. If set false, separator style will follow the system style."
+        },
+        "pasteImage.prefix": {
+          "type": "string",
+          "default": "",
+          "description": "The string prepend to the resolved image path before paste."
+        },
+        "pasteImage.suffix": {
+          "type": "string",
+          "default": "",
+          "description": "The string append to the resolved image path before paste."
+        },
+        "pasteImage.defaultName": {
+          "type": "string",
+          "default": "Y-MM-DD-HH-mm-ss",
+          "description": "The default image file name. The value of this config will be pass to the 'format' function of moment library(a js time manipulation library), you can read document https://momentjs.com/docs/#/displaying/format/ for advanced usage."
+        },
+        "pasteImage.namePrefix": {
+          "type": "string",
+          "default": "",
+          "description": "The string prepend to the image file name."
+        },
+        "pasteImage.nameSuffix": {
+          "type": "string",
+          "default": "",
+          "description": "The string append to the image file name."
+        },
+        "pasteImage.encodePath": {
+          "type": "string",
+          "enum": [
+            "none",
+            "urlEncode",
+            "urlEncodeSpace"
+          ],
+          "default": "urlEncodeSpace",
+          "description": "The string append to the image file name. How to encode image path before insert to editor. Support options: none, urlEncode, urlEncodeSpace"
+        },
+        "pasteImage.insertPattern": {
+          "type": "string",
+          "default": "${imageSyntaxPrefix}${imageFilePath}${imageSyntaxSuffix}",
+          "description": "The pattern of string that would be pasted to text."
+        },
+        "pasteImage.showFilePathConfirmInputBox": {
+          "type": "boolean",
+          "default": false,
+          "description": "Set to true if you want to be able to change the file path or name prior to saving the file to disk"
+        },
+        "pasteImage.filePathConfirmInputBoxMode": {
+          "type": "string",
+          "enum": [
+            "fullPath",
+            "onlyName"
+          ],
+          "default": "fullPath",
+          "description": "Set the mode of file path confirm input box"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "extension.pasteImage",
+        "title": "Paste Image"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "extension.pasteImage",
+        "key": "ctrl+alt+v",
+        "mac": "cmd+alt+v",
+        "when": "editorTextFocus"
+      }
+    ]
+  },
+  "keywords": [
+    "paste",
+    "image",
+    "markdown",
+    "paste image",
+    "keybindings"
+  ],
   "scripts": {
     "build": "NODE_ENV=production tsup",
     "dev": "NODE_ENV=development tsup --watch",
@@ -58,7 +161,7 @@
     "@babel/traverse": "^7.18.8",
     "@babel/types": "^7.18.8",
     "@types/node": "^18.0.3",
-    "@types/vscode": "^1.69.0",
+    "@types/vscode": "^1.71.0",
     "bumpp": "^8.2.1",
     "eslint": "^8.19.0",
     "esno": "^0.16.3",

@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/ChrisTowles/vscode-markdown-paste-image/main/docs/images/icon.png" height="150">
+<img src="https://raw.githubusercontent.com/ChrisTowles/vscode-markdown-paste-image/main/res/icon.png" height="150">
 </p>
 
 <h1 align="center">Markdown Paste image <sup>VS Code</sup></h1>
