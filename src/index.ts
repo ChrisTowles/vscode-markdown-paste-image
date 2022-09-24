@@ -1,4 +1,6 @@
 import vscode from 'vscode';
+import { log } from './log';
+import { Paster } from './paster';
 //     Selection, TextEditor } from 'vscode';
 // import { TextEditorSelectionChangeKind, window, workspace, OutputChannel } from 'vscode';
 // import type { AstRoot } from './types'
@@ -28,24 +30,27 @@ import vscode from 'vscode';
 // }
 
 export function activate(context: vscode.ExtensionContext) {
-    // console.log('Congratulations, your extension "test1" is now active!');
-    //   let last = 0
-    //   let prevEditor: TextEditor | undefined
-    //   let prevSelection: Selection | undefined
-    //   let timer: any
+    
+    context.subscriptions.push(log.channel);
+    log.log('Congratulations, your extension "vscode-markdown-paste-image" is now active!');
+
 
     // const config = workspace.getConfiguration('pasteImage')
-
-
-    let disposable = vscode.commands.registerCommand('test1.helloWorld', () => {
+    
+    let disposable = vscode.commands.registerCommand('extension.pasteImage', () => {
         // The code you place here will be executed every time your command is executed
         // Display a message box to the user
-        vscode.window.showInformationMessage('Markdown Image Paste test!');
+        // log.showInformationMessage('Markdown Image Paste test!');
+
+        try {
+            Paster.paste();
+        } catch (ex) {
+            log.showErrorMessage((ex as Error).message);
+        }
     });
 
 
     context.subscriptions.push(
-        // Logger.channel,
         disposable,
 
         // workspace.onDidChangeTextDocument((e) => {

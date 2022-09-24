@@ -11,7 +11,9 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "types": [
-      "@babel/types"
+      "@babel/types",
+      "node"
+
     ]
   },
   "exclude": [

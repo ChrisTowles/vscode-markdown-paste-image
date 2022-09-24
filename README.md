@@ -36,6 +36,10 @@ All the rules are enabled by default. To disable a specific rule, set the rule t
 
 `// TODO GIF`
 
+## VsCode Docs
+
+- <https://code.visualstudio.com/api/references/activation-events>
+
 ## Credits
 
 I wanted to make this plugin after issues with markdown image paste [mushan.vscode-paste-image](https://marketplace.visualstudio.com/items?itemName=mushan.vscode-paste-image). After looking for an alternative and finding out that it looked like there were half a [dozen copies](https://marketplace.visualstudio.com/search?term=image%20paste%20markdown&target=VSCode&category=Other&sortBy=Relevance) and most forks and longer maintained.
