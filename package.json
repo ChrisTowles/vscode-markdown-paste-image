@@ -1,0 +1,76 @@
+{
+  "publisher": "ChrisTowles",
+  "name": "markdown-paste-image",
+  "displayName": "Markdown Paste Image",
+  "version": "0.1.1",
+  "packageManager": "pnpm@7.5.0",
+  "description": "Paste Image in markdown from clipboard",
+  "author": "Chris Towles",
+  "license": "MIT",
+  "homepage": "https://github.com/ChrisTowles/vscode-markdown-paste-image#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ChrisTowles/vscode-markdown-paste-image"
+  },
+  "bugs": {
+    "url": "https://github.com/ChrisTowles/vscode-markdown-paste-image/issues"
+  },
+  "categories": [
+    "Other"
+  ],
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "icon": "docs/images/icon.png",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "vscode": "^1.69.0"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "configuration": {
+      "properties": {
+        "description": "Rule toggles"
+      }
+    }
+  },
+  "scripts": {
+    "build": "NODE_ENV=production tsup",
+    "dev": "NODE_ENV=development tsup --watch",
+    "lint": "eslint .",
+    "vscode:prepublish": "nr build",
+    "publish": "vsce publish --no-dependencies",
+    "pack": "vsce package --no-dependencies",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit",
+    "release": "bumpp --commit --push --tag && nr publish",
+    "readme": "esno ./scripts/docs.ts"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^0.25.2",
+    "@antfu/ni": "^0.16.3",
+    "@antfu/utils": "^0.5.2",
+    "@babel/core": "^7.18.6",
+    "@babel/parser": "^7.18.8",
+    "@babel/traverse": "^7.18.8",
+    "@babel/types": "^7.18.8",
+    "@types/node": "^18.0.3",
+    "@types/vscode": "^1.69.0",
+    "bumpp": "^8.2.1",
+    "eslint": "^8.19.0",
+    "esno": "^0.16.3",
+    "fast-glob": "^3.2.11",
+    "htmlparser2": "^7.2.0",
+    "node-html-parser": "^5.3.3",
+    "pnpm": "^7.5.1",
+    "rimraf": "^3.0.2",
+    "tsup": "^6.1.3",
+    "typescript": "^4.7.4",
+    "vite": "^2.9.14",
+    "vitest": "^0.18.0",
+    "vsce": "^2.9.2"
+  }
+}
