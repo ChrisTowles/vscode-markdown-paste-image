@@ -4,6 +4,8 @@ import * as fse from 'fs-extra';
 import { ILogger } from "../logger";
 import { SaveClipboardImageToFileResult } from "../dto/SaveClipboardImageToFileResult";
 
+
+
 export const linuxCreateImageWithXClip = async ({ imagePath, logger }: { imagePath: string; logger: ILogger; }): Promise<SaveClipboardImageToFileResult>  =>{
     let scriptPath = path.join(__dirname, '../res/linux.sh');
 
@@ -12,30 +14,46 @@ export const linuxCreateImageWithXClip = async ({ imagePath, logger }: { imagePa
     }
     return new Promise<SaveClipboardImageToFileResult>((resolve, reject) => {
 
-        let ascript = spawn('sh', [scriptPath, imagePath]);
-        ascript.on('error', function (e) {
+        let outputData: string = '';
+
+        let shellScript = spawn('sh', [scriptPath, imagePath]);
+        shellScript.on('error', function (e) {
             logger.showErrorMessage(e.message);
         });
-        ascript.on('exit', function (code, signal) {
+        shellScript.on('exit', async function (code, signal) {
             logger.log(`scriptPath: "${scriptPath}" exit code: ${code} signal: ${signal}`);
-        });
-        ascript.stdout.on('data', function (data: Buffer) {
-            let result = data.toString().trim();
-            logger.log(`script result data: ${data}`);
-            if (result.includes("no xclip found")) {
-                logger.showInformationMessage('You need to install "xclip" command app first.');
+
+            if(code === 0) {
+                resolve({
+                    success: true,
+                    imagePath: imagePath,
+                    noImageInClipboard: false,
+                    scriptOutput: outputData.split('\n'),
+                }); 
+                
+            } else {
+            
+                outputData.split('\n').forEach(line => {
+                     logger.log(`script result data: ${line}`);
+                });
+
+                if (outputData.includes("error: no xclip found")) {
+                    await logger.showInformationMessage('You need to install "xclip" command app first.');
+                }
+                
                 resolve({
                     success: false,
+                    noImageInClipboard: outputData.includes("warning: no image in clipboard"),
+                    scriptOutput: outputData.split('\n'),
                 });
             }
-            
-            resolve({
-                success: true,
-                paths: {
-                    imagePath: imagePath,
-                    imagePathFromScript: result,
-                }
-            });
+
+
+        });
+
+        shellScript.stdout.on('data', async function (data: Buffer) {
+            // save all the output till exit
+            outputData += data.toString().trim() + '\n';
         });
     });
 }

@@ -30,10 +30,10 @@ export const macCreateImageWithAppleScript = async ({ imagePath, logger }: { ima
 
             resolve({
                 success: true,
-                paths: {
-                    imagePath: imagePath,
-                    imagePathFromScript: data.toString().trim(),
-                }
+                noImageInClipboard: false,
+                imagePath: imagePath,
+                scriptOutput: [data.toString().trim()],
+                
             });
         });
             

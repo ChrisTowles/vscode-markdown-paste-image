@@ -1,9 +1,8 @@
 
 export interface SaveClipboardImageToFileResult {
     success: boolean;
-    paths?: {
-        imagePath: string;
-        imagePathFromScript: string;
-    }
-    
+    noImageInClipboard?: boolean;
+    imagePath?: string;
+    scriptOutput?: string[];
+   
 }

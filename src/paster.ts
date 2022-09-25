@@ -9,7 +9,6 @@ import { DateTime } from 'luxon';
 import { win32CreateImageWithPowershell } from './osTools/win32';
 import { macCreateImageWithAppleScript } from './osTools/mac-os';
 import { SaveClipboardImageToFileResult } from './dto/SaveClipboardImageToFileResult';
-import util from 'util';
 
 
 export class Paster {
@@ -61,7 +60,7 @@ export class Paster {
 
         logger.log(`projectPath = ${projectPath}`);
         logger.log(`fileUri     = ${fileUri}`);
-        if (projectPath === '') 
+        if (projectPath === '')
             return;
 
 
@@ -119,10 +118,6 @@ export class Paster {
         this.nameSuffixConfig = this.replacePathVariable(this.nameSuffixConfig, projectPath, filePath);
         this.insertPatternConfig = this.replacePathVariable(this.insertPatternConfig, projectPath, filePath);
 
-        // "this" is lost when coming back from the callback, thus we need to store it here.
-        const instance = this;
-
-
 
         try {
             const imagePath = await this.getImagePath({ filePath, selectText, folderPathFromConfig: this.folderPathConfig, showFilePathConfirmInputBox: this.showFilePathConfirmInputBox, filePathConfirmInputBoxMode: this.filePathConfirmInputBoxMode, logger })
@@ -134,11 +129,9 @@ export class Paster {
 
                 if (choose != 'Replace')
                     return;
-
-                await instance.saveAndPaste({ editor, imagePath, logger });
-            } else {
-                await instance.saveAndPaste({ editor, imagePath, logger });
             }
+            await this.saveAndPaste({ editor, imagePath, logger });
+
         } catch (err) {
             logger.showErrorMessage(`fs.existsSync(${filePath}) fail. message=${(err as Error).message}`);
             return;
@@ -150,26 +143,22 @@ export class Paster {
 
     public static async saveAndPaste({ editor, imagePath, logger }: { editor: vscode.TextEditor; imagePath: string; logger: ILogger; }): Promise<void> {
 
-        logger.debug('saveAndPaste Start');
+        logger.debug(`saveAndPaste Start, imagePath = ${imagePath}`);
 
         try {
-            imagePath = await createImageDirWithImagePath(imagePath)
+            const imageFolder = await createImageDirWithImagePath(imagePath)
+            logger.debug(`imageFolder = ${imageFolder}`);
 
-            logger.debug('createImageDirWithImagePath: ' + imagePath);
             // save image and insert to current edit file
             const result = await this.saveClipboardImageToFileAndGetPath({ imagePath, logger });
 
-
             if (result.success) {
-                logger.debug(`saveClipboardImageToFileAndGetPath - ${imagePath} - imagePath: ${result.paths?.imagePath}`);
+                logger.debug(`saveClipboardImageToFileAndGetPath - ${imagePath} }`);
             } else {
-                logger.debug('There is not an image path returned By script.');
-                return;
-            }
 
-            // TODO this includes is wrong.
-            if (result.paths?.imagePathFromScript.includes('no image')) {
-                logger.showInformationMessage('There is not an image in the clipboard.');
+                if (result.noImageInClipboard) {
+                    await logger.showErrorMessage('No Image was found in the clipboard.');
+                }
                 return;
             }
 
@@ -187,9 +176,7 @@ export class Paster {
 
         }
         catch (err) {
-
             logger.showErrorMessage((err as Error).message);
-
         }
 
         logger.debug('saveAndPaste end');
@@ -197,8 +184,7 @@ export class Paster {
 
     public static async getImagePath({ filePath, selectText, folderPathFromConfig, showFilePathConfirmInputBox, filePathConfirmInputBoxMode, logger }: { filePath: string; selectText: string; folderPathFromConfig: string; showFilePathConfirmInputBox: boolean; filePathConfirmInputBoxMode: string; logger: ILogger }): Promise<string> {
 
-            logger.debug('getImagePath start');
-
+        logger.debug('getImagePath start');
 
         // image file name
         let imageFileName = "";
@@ -206,8 +192,9 @@ export class Paster {
             imageFileName = this.namePrefixConfig + DateTime.now().toFormat(this.defaultNameConfig) + this.nameSuffixConfig + ".png";
 
         } else {
-            imageFileName = this.namePrefixConfig + selectText + this.nameSuffixConfig + ".png";
+            imageFileName = this.namePrefixConfig + selectText + this.nameSuffixConfig;
         }
+        imageFileName = Paster.ensurePngAddedToFileName(imageFileName);
 
         let filePathOrName;
         if (filePathConfirmInputBoxMode == Paster.FILE_PATH_CONFIRM_INPUT_BOX_MODE_PULL_PATH) {
@@ -224,8 +211,7 @@ export class Paster {
             });
 
             if (userEnteredFileName) {
-                if (!userEnteredFileName.toLowerCase().endsWith('.png'))
-                    userEnteredFileName += '.png';
+                userEnteredFileName = Paster.ensurePngAddedToFileName(userEnteredFileName);
 
                 if (filePathConfirmInputBoxMode == Paster.FILE_PATH_CONFIRM_INPUT_BOX_MODE_ONLY_NAME) {
                     filePathOrName = makeImagePath({ fileName: userEnteredFileName, folderPathFromConfig: folderPathFromConfig, filePath: filePath });
@@ -249,7 +235,13 @@ export class Paster {
         return filePathOrName;
     }
 
-    private static async saveClipboardImageToFileAndGetPath({ imagePath, logger }: { imagePath: string; logger: ILogger}): Promise<SaveClipboardImageToFileResult> {
+    private static ensurePngAddedToFileName(userEnteredFileName: string) {
+        if (!userEnteredFileName.toLowerCase().endsWith('.png'))
+            userEnteredFileName += '.png';
+        return userEnteredFileName;
+    }
+
+    private static async saveClipboardImageToFileAndGetPath({ imagePath, logger }: { imagePath: string; logger: ILogger }): Promise<SaveClipboardImageToFileResult> {
         if (!imagePath) {
             logger.log('imagePath is empty');
             return { success: false };
@@ -267,7 +259,7 @@ export class Paster {
             // Linux 
             result = await linuxCreateImageWithXClip({ imagePath, logger });
         }
-        logger.log(`createImage result = ${util.inspect(result, { showHidden: false,  depth: null, colors: true })}`);
+        logger.log(`createImage result = ${JSON.stringify(result, null, 2)}`);
         return result;
     }
 

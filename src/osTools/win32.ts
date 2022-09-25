@@ -42,10 +42,10 @@ export const win32CreateImageWithPowershell = async ({ imagePath, logger }: { im
             
             resolve({
                 success: true,
-                paths: {
-                    imagePath: imagePath,
-                    imagePathFromScript: data.toString().trim(),
-                }
+                noImageInClipboard: false,
+                imagePath: imagePath,
+                scriptOutput: [data.toString().trim()],
+
             });
         });
             
