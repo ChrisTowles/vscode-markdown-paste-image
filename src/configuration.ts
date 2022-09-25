@@ -1,12 +1,12 @@
 import { Constants } from "./constants";
-import vscode from 'vscode';
+import { WorkspaceConfiguration } from 'vscode';
 import path from "path";
 import { ILogger } from "./logger";
 
 export interface  Configuration {
     prefixConfig: string;
     suffixConfig: string;
-    forceUnixStyleSeparatorConfig:  string;
+    forceUnixStyleSeparatorConfig:  boolean;
     encodePathConfig:  string;
     namePrefixConfig:  string;
     nameSuffixConfig:  string;
@@ -26,25 +26,23 @@ const PATH_VARIABLE_CURRENT_FILE_NAME_WITHOUT_EXT = /\$\{currentFileNameWithoutE
 
 
 
-export const loadConfiguration = ({ projectPath, filePath }: { projectPath: string; filePath: string;}): Configuration => {
-    const configuration = vscode.workspace.getConfiguration(Constants.ConfigurationName)
 
+export const parseConfigurationToConfig = ({ projectPath, filePath, configuration }: { projectPath: string; filePath: string; configuration: WorkspaceConfiguration}): Configuration => {
 
-    let defaultNameConfig = configuration['defaultName']
-    let folderPathConfig = configuration['path']
-    let basePathConfig = configuration['basePath']
-    let prefixConfig = configuration['prefix'];
-    let suffixConfig = configuration['suffix'];
-    let forceUnixStyleSeparatorConfig = configuration['forceUnixStyleSeparator'];
+    let defaultNameConfig = configuration.get<string>(Constants.Config_DefaultName);
+    let folderPathConfig = configuration.get<string>(Constants.Config_FolderPath);
+    let basePathConfig = configuration.get<string>(Constants.Config_BasePath );
+    let prefixConfig = configuration.get<string>(Constants.Config_Prefix, '');
+    let suffixConfig = configuration.get<string>(Constants.Config_Suffix, '');
+    let forceUnixStyleSeparatorConfig = configuration.get<boolean>(Constants.Config_ForceUnixStyleSeparator );
     
-    let encodePathConfig =  configuration['encodePath'];
-    let namePrefixConfig =  configuration['namePrefix'];
-    let nameSuffixConfig =  configuration['nameSuffix'];
-    let insertPatternConfig =  configuration['insertPattern'];
-    let showFilePathConfirmInputBox=  configuration['showFilePathConfirmInputBox'] || false;
-    let filePathConfirmInputBoxMode =  configuration['filePathConfirmInputBoxMode'];
-    
-    
+    let encodePathConfig =  configuration.get<string>(Constants.Config_EncodePath, '');
+    let namePrefixConfig =  configuration.get<string>(Constants.Config_NamePrefix, '');
+    let nameSuffixConfig =  configuration.get<string>(Constants.Config_NameSuffix, '');
+    let insertPatternConfig =  configuration.get<string>(Constants.Config_InsertPattern, '');
+    let showFilePathConfirmInputBox=  configuration.get<boolean>(Constants.Config_ShowFilePathConfirmInputBox) || false;
+    let filePathConfirmInputBoxMode =  configuration.get<string>(Constants.Config_FilePathConfirmInputBoxMode) || "inputBox";
+        
   // load config pasteImage.defaultName
   
   if (!defaultNameConfig) {
@@ -52,7 +50,6 @@ export const loadConfiguration = ({ projectPath, filePath }: { projectPath: stri
   }
 
   // load config pasteImage.path
-  
   if (!folderPathConfig) {
       folderPathConfig = "${currentFileDir}";
   }

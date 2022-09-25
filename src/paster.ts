@@ -9,12 +9,13 @@ import { DateTime } from 'luxon';
 import { win32CreateImageWithPowershell } from './osTools/win32';
 import { macCreateImageWithAppleScript } from './osTools/macOS';
 import { SaveClipboardImageToFileResult } from './dto/SaveClipboardImageToFileResult';
-import { Configuration, loadConfiguration } from './configuration';
+import { Configuration, parseConfigurationToConfig } from './configuration';
+import { Constants } from './constants';
 
 
 export class Paster {
 
-  
+
     static PATH_VARIABLE_IMAGE_FILE_PATH = /\$\{imageFilePath\}/g;
     static PATH_VARIABLE_IMAGE_ORIGINAL_FILE_PATH = /\$\{imageOriginalFilePath\}/g;
     static PATH_VARIABLE_IMAGE_FILE_NAME = /\$\{imageFileName\}/g;
@@ -60,8 +61,13 @@ export class Paster {
 
         // load other config
         let config: Configuration;
-        try{
-            config = loadConfiguration({projectPath, filePath});
+        try {
+
+            config = parseConfigurationToConfig({
+                projectPath,
+                filePath,
+                configuration: vscode.workspace.getConfiguration(Constants.ConfigurationName)
+            });
 
             logger.debug(`config = ${JSON.stringify(config, null, 2)}`);
         } catch (err) {
@@ -70,8 +76,8 @@ export class Paster {
         }
 
         // replace variable in config
-      
-        const imagePath = await this.getImagePath({ filePath, selectText, config:  config, logger })
+
+        const imagePath = await this.getImagePath({ filePath, selectText, config: config, logger })
         try {
             // is the file existed?
             let fileAlreadyExisted = await fse.existsSync(imagePath);
@@ -104,7 +110,7 @@ export class Paster {
             const result = await this.saveClipboardImageToFileAndGetPath({ imagePath, logger });
 
             if (result.success) {
-                logger.debug(`saveClipboardImageToFileAndGetPath - ${imagePath} }`);
+                logger.debug(`saveClipboardImageToFileAndGetPath - ${result.imagePath} }`);
             } else {
 
                 if (result.noImageInClipboard) {

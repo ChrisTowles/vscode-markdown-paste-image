@@ -35,7 +35,7 @@
       "type": "object",
       "title": "Paste Image Configuration",
       "properties": {
-        "pasteImage.path": {
+        "pasteImage.folderPath": {
           "type": "string",
           "default": "${currentFileDir}",
           "description": "The destination to save image file.You can use variable ${currentFileDir} and ${projectRoot}. ${currentFileDir} will be replace by the path of directory that contain current editing file. ${projectRoot} will be replace by path of the project opened in vscode."
