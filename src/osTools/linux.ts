@@ -4,15 +4,17 @@ import * as fse from 'fs-extra';
 import { ILogger } from "../logger";
 import { SaveClipboardImageToFileResult } from "../dto/SaveClipboardImageToFileResult";
 
-
-
 export const linuxCreateImageWithXClip = async ({ imagePath, logger }: { imagePath: string; logger: ILogger; }): Promise<SaveClipboardImageToFileResult>  =>{
     let scriptPath = path.join(__dirname, '../res/linux.sh');
-
+    
     if(! await fse.pathExists(scriptPath)) {
-        logger.showErrorMessage(`Script file not found: ${scriptPath}`);
+        const errorMsg = `Script file not found: ${scriptPath}`
+        logger.showErrorMessage(errorMsg);
+        throw  new Error(errorMsg);
     }
+
     return new Promise<SaveClipboardImageToFileResult>((resolve, reject) => {
+        
 
         let outputData: string = '';
 

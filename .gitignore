@@ -10,3 +10,6 @@ logs
 node_modules
 temp
 *.vsix
+
+
+playground/*.png

@@ -1,8 +1,6 @@
 import { DateTime } from 'luxon';
 import { OutputChannel, window } from 'vscode'
-
-const padLeft = (nr: number, len = 2, chr = `0`) => `${nr}`.padStart(2, chr);
-
+import { Constants } from './constants';
 export interface ILogger { 
   debug(...args: any[]): void;
   log(...args: any[]) : void;
@@ -16,7 +14,7 @@ export class Logger implements ILogger {
   readonly isDebug: boolean;
 
   constructor() {
-    this.channel = window.createOutputChannel('Markdown Paste Image')
+    this.channel = window.createOutputChannel(Constants.ChannelLogName)
     this.isDebug = process.env.NODE_ENV === 'development'
   }
 

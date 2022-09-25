@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createImageDirWithImagePath, makeImagePath,  } from './folderUtil'
+import { createImageDirWithImagePath, ensurePngAddedToFileName, makeImagePath, } from './folderUtil'
 import * as path from 'path';
 
 import * as fse from 'fs-extra';
@@ -42,19 +42,28 @@ describe('FolderUtil', () => {
         })
     });
 
-    describe('makeImagePath', () => {
+    const testPath = path.join(__dirname, '..', 'src', 'test').toString();
+    it('makeImagePath', async () => {
 
-        const testPath = path.join(__dirname, '..', 'src', 'test').toString();
-        it('image page 01', async () => {
-            
-            
-            expect(await makeImagePath({
-                folderPathFromConfig: "docs/img",
-                fileName: 'notRealFile.png',
-                filePath: testPath
-            })).contain('/src/docs/img/notRealFile.png')
-        })
 
-    });
+        expect(await makeImagePath({
+            folderPathConfig: "docs/img",
+            fileName: 'notRealFile.png',
+            filePath: testPath
+        })).contain('/src/docs/img/notRealFile.png')
+    })
+
+
+    it('ensurePngAddedToFileName - add .png', async () => {
+        expect(ensurePngAddedToFileName('notRealFile')).toBe('notRealFile.png')
+    })
+
+    it('ensurePngAddedToFileName - already had', async () => {
+        expect(ensurePngAddedToFileName('file.png')).toBe('file.png')
+    })
+
+    it('ensurePngAddedToFileName - already had but not lower case', async () => {
+        expect(ensurePngAddedToFileName('file.PnG')).toBe('file.PnG')
+    })
 
 })

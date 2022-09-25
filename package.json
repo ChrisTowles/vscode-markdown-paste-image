@@ -62,8 +62,8 @@
         },
         "pasteImage.defaultName": {
           "type": "string",
-          "default": "Y-MM-DD-HH-mm-ss",
-          "description": "The default image file name. The value of this config will be pass to the 'format' function of moment library(a js time manipulation library), you can read document https://momentjs.com/docs/#/displaying/format/ for advanced usage."
+          "default": "yyyy-LL-mm-HH-mm-ss",
+          "description": "The default image file name. The value of this config will be pass to the 'format' function of moment library(a js time manipulation library), you can read document https://moment.github.io/luxon/#/formatting?id=table-of-tokens for advanced usage."
         },
         "pasteImage.namePrefix": {
           "type": "string",

@@ -27,17 +27,24 @@ export const createImageDirWithImagePath = async (imagePath: string): Promise<st
      * create directory for image when directory does not exist
      */
 
-export const makeImagePath = ({ folderPathFromConfig, fileName, filePath }: { folderPathFromConfig: string; fileName: string; filePath: string; }): string => {
+export const makeImagePath = ({ folderPathConfig, fileName, filePath }: { folderPathConfig: string; fileName: string; filePath: string; }): string => {
     // image output path
     let folderPath = path.dirname(filePath);
     let imagePath = "";
 
     // generate image path
-    if (path.isAbsolute(folderPathFromConfig)) {
-        imagePath = path.join(folderPathFromConfig, fileName);
+    if (path.isAbsolute(folderPathConfig)) {
+        imagePath = path.join(folderPathConfig, fileName);
     } else {
-        imagePath = path.join(folderPath, folderPathFromConfig, fileName);
+        imagePath = path.join(folderPath, folderPathConfig, fileName);
     }
 
     return imagePath;
+}
+
+
+export const ensurePngAddedToFileName = (userEnteredFileName: string): string => {
+    if (!userEnteredFileName.toLowerCase().endsWith('.png'))
+        userEnteredFileName += '.png';
+    return userEnteredFileName;
 }
