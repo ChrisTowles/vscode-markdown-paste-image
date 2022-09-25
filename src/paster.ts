@@ -1,21 +1,22 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as fse from 'fs-extra';
-import { spawn } from 'child_process';
 import * as upath from 'upath';
-import { log } from './log';
+import { ILogger } from './logger';
+import { createImageDirWithImagePath, makeImagePath } from './folderUtil';
+import { linuxCreateImageWithXClip } from './osTools/linux';
+import { DateTime } from 'luxon';
+import { win32CreateImageWithPowershell } from './osTools/win32';
+import { macCreateImageWithAppleScript } from './osTools/mac-os';
+import { SaveClipboardImageToFileResult } from './dto/SaveClipboardImageToFileResult';
+import util from 'util';
 
-export class PluginError {
-    constructor(public message?: string) {
-    }
-}
 
 export class Paster {
-    static PATH_VARIABLE_CURRNET_FILE_DIR = /\$\{currentFileDir\}/g;
+    static PATH_VARIABLE_CURRENT_FILE_DIR = /\$\{currentFileDir\}/g;
     static PATH_VARIABLE_PROJECT_ROOT = /\$\{projectRoot\}/g;
-    static PATH_VARIABLE_CURRNET_FILE_NAME = /\$\{currentFileName\}/g;
-    static PATH_VARIABLE_CURRNET_FILE_NAME_WITHOUT_EXT = /\$\{currentFileNameWithoutExt\}/g;
+    static PATH_VARIABLE_CURRENT_FILE_NAME = /\$\{currentFileName\}/g;
+    static PATH_VARIABLE_CURRENT_FILE_NAME_WITHOUT_EXT = /\$\{currentFileNameWithoutExt\}/g;
 
     static PATH_VARIABLE_IMAGE_FILE_PATH = /\$\{imageFilePath\}/g;
     static PATH_VARIABLE_IMAGE_ORIGINAL_FILE_PATH = /\$\{imageOriginalFilePath\}/g;
@@ -24,8 +25,8 @@ export class Paster {
     static PATH_VARIABLE_IMAGE_SYNTAX_PREFIX = /\$\{imageSyntaxPrefix\}/g;
     static PATH_VARIABLE_IMAGE_SYNTAX_SUFFIX = /\$\{imageSyntaxSuffix\}/g;
 
-    static FILE_PATH_CONFIRM_INPUTBOX_MODE_ONLY_NAME = "onlyName";
-    static FILE_PATH_CONFIRM_INPUTBOX_MODE_PULL_PATH = "fullPath";
+    static FILE_PATH_CONFIRM_INPUT_BOX_MODE_ONLY_NAME = "onlyName";
+    static FILE_PATH_CONFIRM_INPUT_BOX_MODE_PULL_PATH = "fullPath";
 
     static defaultNameConfig: string;
     static folderPathConfig: string;
@@ -40,10 +41,10 @@ export class Paster {
     static showFilePathConfirmInputBox: boolean;
     static filePathConfirmInputBoxMode: string;
 
-    public static paste() {
+    public static async paste(logger: ILogger): Promise<void> {
         // get current edit file path
         let textEditor = vscode.window.activeTextEditor;
-        if (!textEditor) 
+        if (!textEditor)
             return;
 
         let editor = textEditor!;
@@ -51,21 +52,24 @@ export class Paster {
         let fileUri = editor.document.uri;
         if (!fileUri) return;
         if (fileUri.scheme === 'untitled') {
-            log.showInformationMessage('Before pasting the image, you need to save current file first.');
+            logger.showInformationMessage('Before pasting the image, you need to save current file first.');
             return;
         }
-        let filePath = fileUri.fsPath;
-        let folderPath = path.dirname(filePath);
 
+        let filePath = fileUri.fsPath;
         let projectPath = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
-        log.log(`projectPath=${projectPath}`);
-        log.log(`fileUri=${fileUri}`);
-        
+
+        logger.log(`projectPath = ${projectPath}`);
+        logger.log(`fileUri     = ${fileUri}`);
+        if (projectPath === '') 
+            return;
+
+
         // get selection as image file name, need check
         var selection = editor.selection;
         var selectText = editor.document.getText(selection);
         if (selectText && /[\\:*?<>|]/.test(selectText)) {
-            log.showInformationMessage('Your selection is not a valid filename!');
+            logger.showInformationMessage('Your selection is not a valid filename!');
             return;
         }
 
@@ -81,7 +85,7 @@ export class Paster {
             this.folderPathConfig = "${currentFileDir}";
         }
         if (this.folderPathConfig.length !== this.folderPathConfig.trim().length) {
-            log.showErrorMessage(`The config pasteImage.path = '${this.folderPathConfig}' is invalid. please check your config.`);
+            logger.showErrorMessage(`The config pasteImage.path = '${this.folderPathConfig}' is invalid. please check your config.`);
             return;
         }
         // load config pasteImage.basePath
@@ -90,9 +94,11 @@ export class Paster {
             this.basePathConfig = "";
         }
         if (this.basePathConfig.length !== this.basePathConfig.trim().length) {
-            log.showErrorMessage(`The config pasteImage.path = '${this.basePathConfig}' is invalid. please check your config.`);
+            logger.showErrorMessage(`The config pasteImage.path = '${this.basePathConfig}' is invalid. please check your config.`);
             return;
         }
+        logger.log('load other config');
+
         // load other config
         this.prefixConfig = vscode.workspace.getConfiguration('pasteImage')['prefix'];
         this.suffixConfig = vscode.workspace.getConfiguration('pasteImage')['suffix'];
@@ -115,223 +121,158 @@ export class Paster {
 
         // "this" is lost when coming back from the callback, thus we need to store it here.
         const instance = this;
-        this.getImagePath(filePath, selectText, this.folderPathConfig, this.showFilePathConfirmInputBox, this.filePathConfirmInputBoxMode, function (err, imagePath) {
-            try {
-                // is the file existed?
-                let existed = fs.existsSync(imagePath);
-                if (existed) {
-                    log.showInformationMessage(`File ${imagePath} existed.Would you want to replace?`, 'Replace', 'Cancel').then(choose => {
-                        if (choose != 'Replace') return;
-                        
-                        instance.saveAndPaste(editor, imagePath);
-                    });
-                } else {
-                    instance.saveAndPaste(editor, imagePath);
-                }
-            } catch (err) {
-                log.showErrorMessage(`fs.existsSync(${imagePath}) fail. message=${(err as Error).message}`);
+
+
+
+        try {
+            const imagePath = await this.getImagePath({ filePath, selectText, folderPathFromConfig: this.folderPathConfig, showFilePathConfirmInputBox: this.showFilePathConfirmInputBox, filePathConfirmInputBoxMode: this.filePathConfirmInputBoxMode, logger })
+
+            // is the file existed?
+            let existed = fs.existsSync(imagePath);
+            if (existed) {
+                let choose = await logger.showInformationMessage(`File ${imagePath} existed.  Would you want to replace?`, 'Replace', 'Cancel')
+
+                if (choose != 'Replace')
+                    return;
+
+                await instance.saveAndPaste({ editor, imagePath, logger });
+            } else {
+                await instance.saveAndPaste({ editor, imagePath, logger });
+            }
+        } catch (err) {
+            logger.showErrorMessage(`fs.existsSync(${filePath}) fail. message=${(err as Error).message}`);
+            return;
+        }
+
+
+        logger.debug('Paste End');
+    }
+
+    public static async saveAndPaste({ editor, imagePath, logger }: { editor: vscode.TextEditor; imagePath: string; logger: ILogger; }): Promise<void> {
+
+        logger.debug('saveAndPaste Start');
+
+        try {
+            imagePath = await createImageDirWithImagePath(imagePath)
+
+            logger.debug('createImageDirWithImagePath: ' + imagePath);
+            // save image and insert to current edit file
+            const result = await this.saveClipboardImageToFileAndGetPath({ imagePath, logger });
+
+
+            if (result.success) {
+                logger.debug(`saveClipboardImageToFileAndGetPath - ${imagePath} - imagePath: ${result.paths?.imagePath}`);
+            } else {
+                logger.debug('There is not an image path returned By script.');
                 return;
             }
-        });
-    }
 
-    public static saveAndPaste(editor: vscode.TextEditor, imagePath: string) {
-        this.createImageDirWithImagePath(imagePath).then(imagePath => {
-            // save image and insert to current edit file
-            this.saveClipboardImageToFileAndGetPath(imagePath, (imagePath, imagePathReturnByScript) => {
-                if (!imagePathReturnByScript) return;
-                if (imagePathReturnByScript === 'no image') {
-                    log.showInformationMessage('There is not an image in the clipboard.');
-                    return;
-                }
-
-                imagePath = this.renderFilePath(editor.document.languageId, this.basePathConfig, imagePath, this.forceUnixStyleSeparatorConfig, this.prefixConfig, this.suffixConfig);
-
-                editor.edit(edit => {
-                    let current = editor.selection;
-
-                    if (current.isEmpty) {
-                        edit.insert(current.start, imagePath);
-                    } else {
-                        edit.replace(current, imagePath);
-                    }
-                });
-            });
-        }).catch(err => {
-            if (err) {
-                log.showErrorMessage(err.message);
-            } else {
-                log.showErrorMessage(`Failed make folder. message=${err.message}`);
+            // TODO this includes is wrong.
+            if (result.paths?.imagePathFromScript.includes('no image')) {
+                logger.showInformationMessage('There is not an image in the clipboard.');
+                return;
             }
-            return;
-        });
+
+            imagePath = this.renderFilePath(editor.document.languageId, this.basePathConfig, imagePath, this.forceUnixStyleSeparatorConfig, this.prefixConfig, this.suffixConfig);
+
+            editor.edit((edit) => {
+                let current = editor.selection;
+
+                if (current.isEmpty) {
+                    edit.insert(current.start, imagePath);
+                } else {
+                    edit.replace(current, imagePath);
+                }
+            });
+
+        }
+        catch (err) {
+
+            logger.showErrorMessage((err as Error).message);
+
+        }
+
+        logger.debug('saveAndPaste end');
     }
 
-    public static getImagePath(filePath: string, selectText: string, folderPathFromConfig: string, 
-        showFilePathConfirmInputBox: boolean, filePathConfirmInputBoxMode: string,
-        callback: (err: Error | null, imagePath: string) => void) {
+    public static async getImagePath({ filePath, selectText, folderPathFromConfig, showFilePathConfirmInputBox, filePathConfirmInputBoxMode, logger }: { filePath: string; selectText: string; folderPathFromConfig: string; showFilePathConfirmInputBox: boolean; filePathConfirmInputBoxMode: string; logger: ILogger }): Promise<string> {
+
+            logger.debug('getImagePath start');
+
+
         // image file name
         let imageFileName = "";
         if (!selectText) {
-            //imageFileName = this.namePrefixConfig + moment().format(this.defaultNameConfig) + this.nameSuffixConfig + ".png";
-            imageFileName = this.namePrefixConfig + this.nameSuffixConfig + ".png";
+            imageFileName = this.namePrefixConfig + DateTime.now().toFormat(this.defaultNameConfig) + this.nameSuffixConfig + ".png";
+
         } else {
             imageFileName = this.namePrefixConfig + selectText + this.nameSuffixConfig + ".png";
         }
 
         let filePathOrName;
-        if(filePathConfirmInputBoxMode == Paster.FILE_PATH_CONFIRM_INPUTBOX_MODE_PULL_PATH){
-            filePathOrName = makeImagePath(imageFileName);
+        if (filePathConfirmInputBoxMode == Paster.FILE_PATH_CONFIRM_INPUT_BOX_MODE_PULL_PATH) {
+            filePathOrName = makeImagePath({ fileName: imageFileName, folderPathFromConfig: folderPathFromConfig, filePath: filePath });
         } else {
             filePathOrName = imageFileName;
         }
 
         if (showFilePathConfirmInputBox) {
-            vscode.window.showInputBox({
+
+            let userEnteredFileName = await vscode.window.showInputBox({
                 prompt: 'Please specify the filename of the image.',
                 value: filePathOrName
-            }).then((result) => {
-                if (result) {
-                    if (!result.endsWith('.png')) result += '.png';
-                    
-                    if(filePathConfirmInputBoxMode == Paster.FILE_PATH_CONFIRM_INPUTBOX_MODE_ONLY_NAME){
-                        result = makeImagePath(result);
-                    }
-
-                    callback(null, result);
-                }
-                return;
             });
-        } else {
-            callback(null, makeImagePath(imageFileName));
-            return;
-        }
 
-        function makeImagePath(fileName: string) {
-            // image output path
-            let folderPath = path.dirname(filePath);
-            let imagePath = "";
+            if (userEnteredFileName) {
+                if (!userEnteredFileName.toLowerCase().endsWith('.png'))
+                    userEnteredFileName += '.png';
 
-            // generate image path
-            if (path.isAbsolute(folderPathFromConfig)) {
-                imagePath = path.join(folderPathFromConfig, fileName);
-            } else {
-                imagePath = path.join(folderPath, folderPathFromConfig, fileName);
+                if (filePathConfirmInputBoxMode == Paster.FILE_PATH_CONFIRM_INPUT_BOX_MODE_ONLY_NAME) {
+                    filePathOrName = makeImagePath({ fileName: userEnteredFileName, folderPathFromConfig: folderPathFromConfig, filePath: filePath });
+                }
+
             }
 
-            return imagePath;
+
+        } else {
+
+            filePathOrName = makeImagePath({ fileName: imageFileName, folderPathFromConfig: folderPathFromConfig, filePath: filePath });
+
         }
+
+        logger.debug(`filePath                    = ${filePath}`);
+        logger.debug(`imageFileName               = ${imageFileName}`);
+        logger.debug(`filePathOrName              = ${filePathOrName}`);
+        logger.debug(`showFilePathConfirmInputBox = ${showFilePathConfirmInputBox}`);
+
+        logger.debug('getImagePath end');
+        return filePathOrName;
     }
 
-    /**
-     * create directory for image when directory does not exist
-     */
-    private static createImageDirWithImagePath(imagePath: string): Promise<string> {
-        return new Promise((resolve, reject) => {
-            let imageDir = path.dirname(imagePath);
+    private static async saveClipboardImageToFileAndGetPath({ imagePath, logger }: { imagePath: string; logger: ILogger}): Promise<SaveClipboardImageToFileResult> {
+        if (!imagePath) {
+            logger.log('imagePath is empty');
+            return { success: false };
+        }
 
-            fs.stat(imageDir, (err, stats) => {
-                if (err == null) {
-                    if (stats.isDirectory()) {
-                        resolve(imagePath);
-                    } else {
-                        reject(new PluginError(`The image dest directory '${imageDir}' is a file. Please check your 'pasteImage.path' config.`))
-                    }
-                } else if (err.code == "ENOENT") {
-                    fse.ensureDir(imageDir, (err) => {
-                        if (err) {
-                            reject(err);
-                            return;
-                        }
-                        resolve(imagePath);
-                    });
-                } else {
-                    reject(err);
-                }
-            });
-        });
-    }
-
-    /**
-     * use applescript to save image from clipboard and get file path
-     */
-    private static saveClipboardImageToFileAndGetPath(imagePath: string, cb: (imagePath: string, imagePathFromScript: string) => void) {
-        if (!imagePath) return;
-
+        let result: SaveClipboardImageToFileResult;
         let platform = process.platform;
         if (platform === 'win32') {
-            // Windows
-            const scriptPath = path.join(__dirname, '../../res/pc.ps1');
-
-            let command = "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe";
-            let powershellExisted = fs.existsSync(command)
-            if (!powershellExisted) {
-                command = "powershell"
-            }
-
-            const powershell = spawn(command, [
-                '-noprofile',
-                '-noninteractive',
-                '-nologo',
-                '-sta',
-                '-executionpolicy', 'unrestricted',
-                '-windowstyle', 'hidden',
-                '-file', scriptPath,
-                imagePath
-            ]);
-            powershell.on('error', function (e) {
-                //if (e.code == "ENOENT") {
-                //    log.showErrorMessage(`The powershell command is not in you PATH environment variables. Please add it and retry.`);
-                //} else {
-                    log.showErrorMessage(e.message);
-                //}
-            });
-            powershell.on('exit', function (code, signal) {
-                // console.log('exit', code, signal);
-            });
-            powershell.stdout.on('data', function (data: Buffer) {
-                cb(imagePath, data.toString().trim());
-            });
+            result = await win32CreateImageWithPowershell({ imagePath, logger });
         }
         else if (platform === 'darwin') {
             // Mac
-            let scriptPath = path.join(__dirname, '../../res/mac.applescript');
-
-            let ascript = spawn('osascript', [scriptPath, imagePath]);
-            ascript.on('error', function (e) {
-                log.showErrorMessage(e.message);
-            });
-            ascript.on('exit', function (code, signal) {
-                // console.log('exit',code,signal);
-            });
-            ascript.stdout.on('data', function (data: Buffer) {
-                cb(imagePath, data.toString().trim());
-            });
+            result = await macCreateImageWithAppleScript({ imagePath, logger });
         } else {
             // Linux 
-
-            let scriptPath = path.join(__dirname, '../../res/linux.sh');
-
-            let ascript = spawn('sh', [scriptPath, imagePath]);
-            ascript.on('error', function (e) {
-                log.showErrorMessage(e.message);
-            });
-            ascript.on('exit', function (code, signal) {
-                // console.log('exit',code,signal);
-            });
-            ascript.stdout.on('data', function (data: Buffer) {
-                let result = data.toString().trim();
-                if (result == "no xclip") {
-                    log.showInformationMessage('You need to install xclip command first.');
-                    return;
-                }
-                cb(imagePath, result);
-            });
+            result = await linuxCreateImageWithXClip({ imagePath, logger });
         }
+        logger.log(`createImage result = ${util.inspect(result, { showHidden: false,  depth: null, colors: true })}`);
+        return result;
     }
 
     /**
-     * render the image file path dependen on file type
+     * render the image file path dependent on file type
      * e.g. in markdown image file path will render to ![](path)
      */
     public static renderFilePath(languageId: string, basePath: string, imageFilePath: string, forceUnixStyleSeparator: boolean, prefix: string, suffix: string): string {
@@ -388,11 +329,12 @@ export class Paster {
         let fileNameWithoutExt = path.basename(curFilePath, ext);
 
         pathStr = pathStr.replace(this.PATH_VARIABLE_PROJECT_ROOT, postFunction(projectRoot));
-        pathStr = pathStr.replace(this.PATH_VARIABLE_CURRNET_FILE_DIR, postFunction(currentFileDir));
-        pathStr = pathStr.replace(this.PATH_VARIABLE_CURRNET_FILE_NAME, postFunction(fileName));
-        pathStr = pathStr.replace(this.PATH_VARIABLE_CURRNET_FILE_NAME_WITHOUT_EXT, postFunction(fileNameWithoutExt));
+        pathStr = pathStr.replace(this.PATH_VARIABLE_CURRENT_FILE_DIR, postFunction(currentFileDir));
+        pathStr = pathStr.replace(this.PATH_VARIABLE_CURRENT_FILE_NAME, postFunction(fileName));
+        pathStr = pathStr.replace(this.PATH_VARIABLE_CURRENT_FILE_NAME_WITHOUT_EXT, postFunction(fileNameWithoutExt));
         return pathStr;
     }
 }
+
 
 

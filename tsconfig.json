@@ -13,7 +13,6 @@
     "types": [
       "@babel/types",
       "node"
-
     ]
   },
   "exclude": [

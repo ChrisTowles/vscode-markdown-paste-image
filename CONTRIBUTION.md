@@ -7,7 +7,7 @@
 3. Search for `@recommended`.
 4. Make sure to install the `TypeScript + Webpack Problem Matchers` extension.
 5. Run `ni` (or `pnpm i`) in terminal.
-6. Press <kbd>F5</kbd> to start debuging.
+6. Press <kbd>F5</kbd> to start debugging.
 
 ## Troubleshooting
 
@@ -17,8 +17,8 @@
 
 - In `OUTPUT` panel of VS Code 👇.
 
-```
-Error: the description can't be converted into a problem matcher:
+```jsonc
+// Error: the description can't be converted into a problem matcher:
 {
     "base": "$ts-webpack-watch",
     "background": {
@@ -31,7 +31,7 @@ Error: the description can't be converted into a problem matcher:
 
 - A popup saying like this 👇.
 
-```
+```text
 The task 'npm: dev' cannot be tracked. Make sure to have a problem matcher defined.
 ```
 
@@ -47,7 +47,7 @@ After pressing <kbd>F5</kbd>, if there isn't a new terminal named `Task` autosta
 
 - An error tip in the bottom right corner saying like this 👇.
 
-```
+```text
 The terminal process "/bin/zsh '-c', 'pnpm run dev'" terminated with exit code: 127.
 ```
 
