@@ -6,16 +6,18 @@ import { ensureFileAndGetItsDirectory } from "./folderUtil";
 
 export interface Configuration {
     
-    readonly encodePathConfig: string;
+    
+    readonly defaultImageName: string;
+    readonly imageFolderPath: string;
+
 
     readonly insertPatternConfig: string;
     readonly showFilePathConfirmInputBox: boolean,
     readonly filePathConfirmInputBoxMode: FilePathConfirmInputBoxModeEnum;
+    readonly encodePath: EncodePathEnum;
     
 
-    readonly defaultImageName: string;
-    readonly imageFolderPath: string;
-
+    
     // used to prefix and suffix the image name
     readonly imageNamePrefix: string;
     readonly imageNameSuffix: string;
@@ -28,9 +30,15 @@ export interface Configuration {
 
 }
 
-export enum  FilePathConfirmInputBoxModeEnum {
+export enum FilePathConfirmInputBoxModeEnum {
     ONLY_NAME = "onlyName",
     FULL_PATH = "fullPath",
+}
+
+export enum EncodePathEnum {
+    None = "none",
+    UrlEncode =  "urlEncode",
+    UrlEncodeSpace = "urlEncodeSpace"
 }
 
 export const parseConfigurationToConfig = async ({ projectRootDirPath, editorOpenFilePath, configuration }: { projectRootDirPath: string; editorOpenFilePath: string; configuration: WorkspaceConfiguration }): Promise<Configuration> => {
@@ -41,9 +49,9 @@ export const parseConfigurationToConfig = async ({ projectRootDirPath, editorOpe
     // Luxon Values used in ImageName = https://moment.github.io/luxon/#/formatting?id=table-of-tokens
     let defaultImageName = configuration.get<string>(Constants.Config_DefaultImageName, "yyyy-LL-dd-HH-mm-ss");
     let imageFolderPath = configuration.get<string>(Constants.Config_ImageFolderPath, "${currentFileDir}");
-       
+      
 
-    let encodePathConfig = configuration.get<string>(Constants.Config_EncodePath, '');
+    let encodePath = configuration.get<EncodePathEnum>(Constants.Config_EncodePath, EncodePathEnum.UrlEncodeSpace);
     let insertPatternConfig = configuration.get<string>(Constants.Config_InsertPattern, '');
 
 
@@ -75,7 +83,7 @@ export const parseConfigurationToConfig = async ({ projectRootDirPath, editorOpe
         defaultImageName: defaultImageName,
         imageFolderPath: imageFolderPath,
 
-        encodePathConfig: encodePathConfig,
+        encodePath: encodePath,
         
         insertPatternConfig: insertPatternConfig,
         showFilePathConfirmInputBox: showFilePathConfirmInputBox,

@@ -6,10 +6,7 @@ import * as fse from 'fs-extra';
 
 describe('FolderUtil', () => {
 
-
     describe('createImageDirWithImagePath', () => {
-
-
 
         it('valid existing folder 01', async () => {
 

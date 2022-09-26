@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import * as path from 'path';
 import util from 'util';
-import { getRelativePathFromEditorFile, renderTextWithImagePath } from './renderTextWithImagePath';
+import { encodeImagePath, getRelativePathFromEditorFile, renderTextWithImagePath } from './renderTextWithImagePath';
 import { MockWorkspaceConfiguration } from './test/mockWorkspaceConfiguration';
-import { Configuration, parseConfigurationToConfig } from './configuration';
+import { Configuration, EncodePathEnum, parseConfigurationToConfig } from './configuration';
 import { MockLogger } from './test/mockLogger';
 import { config } from 'process';
 
@@ -22,7 +22,6 @@ describe('renderInsertTextWithImagePath', () => {
     const projectRootDir = path.join(__dirname, '..'); // root of project
 
     const mockLogger = new MockLogger();
-
 
     it('getRelativePathFromEditorFile - when editor and image same folders', async () => {
         const imagePath = path.join(projectRootDir, 'playground', 'test-icon-root.png')
@@ -108,6 +107,54 @@ describe('renderInsertTextWithImagePath', () => {
             imageFilePath: imagePath,
             logger: mockLogger,
         })).toBe('![](../test-icon-root.png)')
+    })
+
+    it('encodeImagePath - UrlEncodeSpace without spaces', async () => {
+        const imagePath = path.join(projectRootDir, 'playground', 'test-icon-root.png')
+        const result = encodeImagePath({imageFilePath: imagePath, encodePath: EncodePathEnum.UrlEncodeSpace})
+
+        expect(result).toContain('test-icon-root.png')
+    })
+
+    it('encodeImagePath - UrlEncodeSpace with spaces', async () => {
+        const imagePath = path.join(projectRootDir, 'playground', 'test icon root.png')
+        const result = encodeImagePath({imageFilePath: imagePath, encodePath: EncodePathEnum.UrlEncodeSpace})
+
+        expect(result).toContain('test%20icon%20root.png')
+    })
+
+    
+    it('encodeImagePath - UrlEncode without spaces', async () => {
+        const imagePath = path.join(projectRootDir, 'playground', 'test-icon-root.png')
+        const result = encodeImagePath({imageFilePath: imagePath, encodePath: EncodePathEnum.UrlEncode})
+
+        expect(result).toContain('test-icon-root.png')
+    })
+
+    it('encodeImagePath - UrlEncode with spaces', async () => {
+        const imagePath = path.join(projectRootDir, 'playground', 'test icon root.png')
+        const result = encodeImagePath({imageFilePath: imagePath, encodePath: EncodePathEnum.UrlEncode})
+
+        expect(result).toContain('test%20icon%20root.png')
+    })
+    it('encodeImagePath - UrlEncode with special chars', async () => {
+        const imagePath = path.join(projectRootDir, 'playground', 'image-file-with-special-chars-шеллы.png')
+        const result = encodeImagePath({imageFilePath: imagePath, encodePath: EncodePathEnum.UrlEncode})
+
+        expect(result).toContain('image-file-with-special-chars-%D1%88%D0%B5%D0%BB%D0%BB%D1%8B.png')
+    })
+
+    it('encodeImagePath - None without spaces', async () => {
+        const imagePath = path.join(projectRootDir, 'playground', 'test-icon-root.png')
+        const result = encodeImagePath({imageFilePath: imagePath, encodePath: EncodePathEnum.None})
+
+        expect(result).toContain('test-icon-root.png')
+    })
+    it('encodeImagePath - None with spaces', async () => {
+        const imagePath = path.join(projectRootDir, 'playground', 'test icon root.png')
+        const result = encodeImagePath({imageFilePath: imagePath, encodePath: EncodePathEnum.None})
+
+        expect(result).toContain('test icon root.png')
     })
 
 })

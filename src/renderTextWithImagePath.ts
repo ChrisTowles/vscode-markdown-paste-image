@@ -1,4 +1,4 @@
-import { Configuration } from "./configuration";
+import { Configuration, EncodePathEnum } from "./configuration";
 import * as path from 'path';
 import * as upath from 'upath';
 import { ILogger } from './logger';
@@ -54,11 +54,7 @@ export const renderTextWithImagePath = async ({ languageId, config, imageFilePat
 
     logger.debug(`imageFilePath  Uri Pre & Suf   = ${imageFilePath}`);
     
-    if (config.encodePathConfig == "urlEncode") {
-        imageFilePath = encodeURI(imageFilePath)
-    } else if (config.encodePathConfig == "urlEncodeSpace") {
-        imageFilePath = imageFilePath.replace(/ /g, "%20");
-    }
+    imageFilePath = encodeImagePath({ imageFilePath, encodePath: config.encodePath });
 
     let imageSyntaxPrefix = "";
     let imageSyntaxSuffix = ""
@@ -84,4 +80,14 @@ export const renderTextWithImagePath = async ({ languageId, config, imageFilePat
 
     logger.debug('renderFilePath end');
     return result;
+}
+
+
+export const encodeImagePath = ({ imageFilePath, encodePath}: { imageFilePath: string; encodePath: EncodePathEnum; }): string => {
+    if (encodePath === EncodePathEnum.UrlEncode) {
+        imageFilePath = encodeURI(imageFilePath)
+    } else if (encodePath === EncodePathEnum.UrlEncodeSpace) {
+        imageFilePath = imageFilePath.replace(/ /g, "%20");
+    }
+    return imageFilePath;
 }
