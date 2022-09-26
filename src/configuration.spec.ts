@@ -15,12 +15,12 @@ describe('Configuration', () => {
         expect(mockWorkspaceConfiguration.get(Constants.Config_ImageFolderPath)).toBe(__dirname);
     })
 
-    it('check parse of default values', () => {
+    it('check parse of default values', async () => {
 
      
-        const config = parseConfigurationToConfig({
-            projectPath: __dirname,
-            editorOpenFilePath: __dirname,
+        const config = await parseConfigurationToConfig({
+            projectRootDirPath: __dirname,
+            editorOpenFilePath: __filename,
             configuration: mockWorkspaceConfiguration,
         })
 
@@ -35,7 +35,7 @@ describe('Configuration', () => {
         const alteredValue = replacePathVariable({
          pathStr: originalPath,
          editorOpenFilePath: editorFile,
-         projectRoot: __dirname,
+         projectRootDirPath: __dirname,
         })
 
         // no replacement done
@@ -49,7 +49,7 @@ describe('Configuration', () => {
         const alteredValue = replacePathVariable({
          pathStr: originalPath,
          editorOpenFilePath: editorFile,
-         projectRoot: __dirname,
+         projectRootDirPath: __dirname,
         })
 
         // should replace with folder of editor file
@@ -64,7 +64,7 @@ describe('Configuration', () => {
         const alteredValue = replacePathVariable({
          pathStr: originalPath,
          editorOpenFilePath: editorFile,
-         projectRoot: __dirname,
+         projectRootDirPath: __dirname,
         })
 
         // should replace with folder of editor file and append another folder
@@ -81,7 +81,7 @@ describe('Configuration', () => {
         const alteredValue = replacePathVariable({
          pathStr: originalPath,
          editorOpenFilePath: editorFile,
-         projectRoot: productRoot,
+         projectRootDirPath: productRoot,
         })
 
         // should replace with folder of editor file
@@ -96,7 +96,7 @@ describe('Configuration', () => {
         const alteredValue = replacePathVariable({
          pathStr: originalPath,
          editorOpenFilePath: editorFile,
-         projectRoot: productRoot,
+         projectRootDirPath: productRoot,
         })
 
         // should replace with folder of editor file
@@ -112,7 +112,7 @@ describe('Configuration', () => {
         const alteredValue = replacePathVariable({
          pathStr: originalPath,
          editorOpenFilePath: editorFile,
-         projectRoot: productRoot,
+         projectRootDirPath: productRoot,
         })
 
         // should replace with editor
@@ -129,7 +129,7 @@ describe('Configuration', () => {
         const alteredValue = replacePathVariable({
          pathStr: originalPath,
          editorOpenFilePath: editorFile,
-         projectRoot: productRoot,
+         projectRootDirPath: productRoot,
         })
 
         let ext = path.extname(editorFile);
@@ -147,7 +147,7 @@ describe('Configuration', () => {
         const alteredValue = replacePathVariable({
          pathStr: originalPath,
          editorOpenFilePath: editorFile,
-         projectRoot: productRoot,
+         projectRootDirPath: productRoot,
         })
 
         let ext = path.extname(editorFile);

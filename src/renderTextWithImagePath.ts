@@ -2,7 +2,35 @@ import { Configuration } from "./configuration";
 import * as path from 'path';
 import * as upath from 'upath';
 import { ILogger } from './logger';
+import { ensurePathIsDirectory } from "./folderUtil";
 
+
+
+
+/**
+     * render the image file path dependent on file type
+     * e.g. in markdown image file path will render to ![](path)
+     */
+
+
+export const getRelativePathFromEditorFile = async ({ editorOpenFolderPath, imageFilePath, logger }: {
+    editorOpenFolderPath: string;  imageFilePath: string;  logger: ILogger; }): Promise<string> => {
+
+    await ensurePathIsDirectory(editorOpenFolderPath);
+
+    logger.debug(`imageFilePath                  = ${imageFilePath}`);
+    imageFilePath = path.relative(editorOpenFolderPath, imageFilePath);
+
+    logger.debug(`imageFilePath  after relative  = ${imageFilePath}`);
+    
+    // Normalize a string path, reducing '..' and '.' parts. When multiple slashes are 
+    // found, they're replaced by a single one; when the path contains a trailing slash, it
+    // is preserved. On Windows backslashes are used.
+    imageFilePath = upath.normalize(imageFilePath);
+    logger.debug(`imageFilePath  after normalize = ${imageFilePath}`);
+    
+    return imageFilePath;
+}
 
 const PATH_VARIABLE_IMAGE_FILE_PATH = /\$\{imageFilePath\}/g;
 const PATH_VARIABLE_IMAGE_ORIGINAL_FILE_PATH = /\$\{imageOriginalFilePath\}/g;
@@ -11,31 +39,21 @@ const PATH_VARIABLE_IMAGE_FILE_NAME_WITHOUT_EXT = /\$\{imageFileNameWithoutExt\}
 const PATH_VARIABLE_IMAGE_SYNTAX_PREFIX = /\$\{imageSyntaxPrefix\}/g;
 const PATH_VARIABLE_IMAGE_SYNTAX_SUFFIX = /\$\{imageSyntaxSuffix\}/g;
 
-/**
-     * render the image file path dependent on file type
-     * e.g. in markdown image file path will render to ![](path)
-     */
-export const renderTextWithImagePath = ({ languageId, config, imageFilePath, logger }: { languageId: string; config: Configuration; imageFilePath: string; logger: ILogger; }): string => {
+export const renderTextWithImagePath = async ({ languageId, config, imageFilePath, logger }: { languageId: string; config: Configuration; imageFilePath: string; logger: ILogger; }): Promise<string> => {
 
-    logger.debug('renderFilePath start');
-    logger.debug('config.imageFolderPath         = ' + config.imageFolderPath);
-    logger.debug('imageFilePath                  = ' + imageFilePath);
-    imageFilePath = path.relative(config.editorOpenFileFolderPath, imageFilePath);
-
-    logger.debug('imageFilePath  after relative  = ' + imageFilePath);
-    //Normalize a string path, reducing '..' and '.' parts.
-    // * When multiple slashes are found, they're replaced by a single one; when the path contains a trailing slash, it is preserved. On Windows backslashes are used.
-    imageFilePath = upath.normalize(imageFilePath);
-    logger.debug('imageFilePath  after normalize = ' + imageFilePath);
+    logger.debug(`renderFilePath start - ${imageFilePath}`);
     
-
+    imageFilePath = await getRelativePathFromEditorFile({ editorOpenFolderPath: config.editorOpenFolderPath, imageFilePath, logger });
     let originalImagePath = imageFilePath;
+    logger.debug(`renderFilePath after getRelativePathFromEditorFile - ${imageFilePath}`);
     let ext = path.extname(originalImagePath);
     let fileName = path.basename(originalImagePath);
     let fileNameWithoutExt = path.basename(originalImagePath, ext);
     
     imageFilePath = `${config.imageUriPathPrefix}${imageFilePath}${config.imageUriPathSuffix}`;
 
+    logger.debug(`imageFilePath  Uri Pre & Suf   = ${imageFilePath}`);
+    
     if (config.encodePathConfig == "urlEncode") {
         imageFilePath = encodeURI(imageFilePath)
     } else if (config.encodePathConfig == "urlEncodeSpace") {
@@ -64,5 +82,6 @@ export const renderTextWithImagePath = ({ languageId, config, imageFilePath, log
     result = result.replace(PATH_VARIABLE_IMAGE_FILE_NAME, fileName);
     result = result.replace(PATH_VARIABLE_IMAGE_FILE_NAME_WITHOUT_EXT, fileNameWithoutExt);
 
+    logger.debug('renderFilePath end');
     return result;
 }

@@ -2,6 +2,7 @@ import { Constants } from "./constants";
 import { WorkspaceConfiguration } from 'vscode';
 import path from "path";
 import { ILogger } from "./logger";
+import { ensureFileAndGetItsDirectory } from "./folderUtil";
 
 export interface Configuration {
     
@@ -9,7 +10,7 @@ export interface Configuration {
 
     readonly insertPatternConfig: string;
     readonly showFilePathConfirmInputBox: boolean,
-    readonly filePathConfirmInputBoxMode: string;
+    readonly filePathConfirmInputBoxMode: FilePathConfirmInputBoxModeEnum;
     
 
     readonly defaultImageName: string;
@@ -22,12 +23,20 @@ export interface Configuration {
     // used for image url prefix and suffix
     readonly imageUriPathPrefix: string;
     readonly imageUriPathSuffix: string;
-    readonly projectRootPath: string;
-    readonly editorOpenFileFolderPath: string;
+    readonly projectRootDirPath: string;
+    readonly editorOpenFolderPath: string;
 
 }
 
-export const parseConfigurationToConfig = ({ projectPath, editorOpenFilePath, configuration }: { projectPath: string; editorOpenFilePath: string; configuration: WorkspaceConfiguration }): Configuration => {
+export enum  FilePathConfirmInputBoxModeEnum {
+    ONLY_NAME = "onlyName",
+    FULL_PATH = "fullPath",
+}
+
+export const parseConfigurationToConfig = async ({ projectRootDirPath, editorOpenFilePath, configuration }: { projectRootDirPath: string; editorOpenFilePath: string; configuration: WorkspaceConfiguration }): Promise<Configuration> => {
+
+    const editorOpenFolderPath = await ensureFileAndGetItsDirectory(editorOpenFilePath)
+    
 
     // Luxon Values used in ImageName = https://moment.github.io/luxon/#/formatting?id=table-of-tokens
     let defaultImageName = configuration.get<string>(Constants.Config_DefaultImageName, "yyyy-LL-dd-HH-mm-ss");
@@ -44,7 +53,7 @@ export const parseConfigurationToConfig = ({ projectPath, editorOpenFilePath, co
     let imageNameSuffix = configuration.get<string>(Constants.Config_ImageNameSuffix, '');
     
     let showFilePathConfirmInputBox = configuration.get<boolean>(Constants.Config_ShowFilePathConfirmInputBox, true);
-    let filePathConfirmInputBoxMode = configuration.get<string>(Constants.Config_FilePathConfirmInputBoxMode, "inputBox");
+    let filePathConfirmInputBoxMode = configuration.get<FilePathConfirmInputBoxModeEnum>(Constants.Config_FilePathConfirmInputBoxMode, FilePathConfirmInputBoxModeEnum.FULL_PATH);
 
 
     if (imageFolderPath.length !== imageFolderPath.trim().length) {
@@ -53,13 +62,13 @@ export const parseConfigurationToConfig = ({ projectPath, editorOpenFilePath, co
     }
     
 
-    defaultImageName = replacePathVariable({ pathStr: defaultImageName, projectRoot: projectPath, editorOpenFilePath: editorOpenFilePath });
-    imageFolderPath = replacePathVariable({ pathStr: imageFolderPath, projectRoot: projectPath, editorOpenFilePath: editorOpenFilePath });
-    imageNamePrefix = replacePathVariable({ pathStr: imageNamePrefix, projectRoot: projectPath, editorOpenFilePath: editorOpenFilePath });
-    imageNameSuffix = replacePathVariable({ pathStr: imageNameSuffix, projectRoot: projectPath, editorOpenFilePath: editorOpenFilePath });
-    insertPatternConfig = replacePathVariable({ pathStr: insertPatternConfig, projectRoot: projectPath, editorOpenFilePath: editorOpenFilePath });
+    defaultImageName = replacePathVariable({ pathStr: defaultImageName, projectRootDirPath: projectRootDirPath, editorOpenFilePath: editorOpenFilePath });
+    imageFolderPath = replacePathVariable({ pathStr: imageFolderPath, projectRootDirPath: projectRootDirPath, editorOpenFilePath: editorOpenFilePath });
+    imageNamePrefix = replacePathVariable({ pathStr: imageNamePrefix, projectRootDirPath: projectRootDirPath, editorOpenFilePath: editorOpenFilePath });
+    imageNameSuffix = replacePathVariable({ pathStr: imageNameSuffix, projectRootDirPath: projectRootDirPath, editorOpenFilePath: editorOpenFilePath });
+    insertPatternConfig = replacePathVariable({ pathStr: insertPatternConfig, projectRootDirPath: projectRootDirPath, editorOpenFilePath: editorOpenFilePath });
 
-
+    
     const config: Configuration = {
 
         // load other config
@@ -79,8 +88,8 @@ export const parseConfigurationToConfig = ({ projectPath, editorOpenFilePath, co
 
         imageUriPathPrefix: imageUriPathPrefix,
         imageUriPathSuffix: imageUriPathSuffix,
-        projectRootPath: projectPath,
-        editorOpenFileFolderPath: path.dirname(editorOpenFilePath),
+        projectRootDirPath: projectRootDirPath,
+        editorOpenFolderPath: editorOpenFolderPath,
 
     };
 
@@ -90,17 +99,17 @@ export const parseConfigurationToConfig = ({ projectPath, editorOpenFilePath, co
 
 // Variables that can be used to replace values in config paths
 const PATH_VARIABLE_CURRENT_FILE_DIR = /\$\{currentFileDir\}/g;
-const PATH_VARIABLE_PROJECT_ROOT = /\$\{projectRoot\}/g;
+const PATH_VARIABLE_PROJECT_ROOT_DIR = /\$\{projectRoot\}/g;
 const PATH_VARIABLE_CURRENT_FILE_NAME = /\$\{currentFileName\}/g;
 const PATH_VARIABLE_CURRENT_FILE_NAME_WITHOUT_EXT = /\$\{currentFileNameWithoutExt\}/g;
 
-export const replacePathVariable = ({ pathStr, projectRoot, editorOpenFilePath }: { pathStr: string; projectRoot: string; editorOpenFilePath: string }): string => {
+export const replacePathVariable = ({ pathStr, projectRootDirPath, editorOpenFilePath }: { pathStr: string; projectRootDirPath: string; editorOpenFilePath: string }): string => {
     let currentFileDir = path.dirname(editorOpenFilePath);
     let ext = path.extname(editorOpenFilePath);
     let fileName = path.basename(editorOpenFilePath);
     let fileNameWithoutExt = path.basename(editorOpenFilePath, ext);
 
-    pathStr = pathStr.replace(PATH_VARIABLE_PROJECT_ROOT, projectRoot);
+    pathStr = pathStr.replace(PATH_VARIABLE_PROJECT_ROOT_DIR, projectRootDirPath);
     pathStr = pathStr.replace(PATH_VARIABLE_CURRENT_FILE_DIR, currentFileDir);
     pathStr = pathStr.replace(PATH_VARIABLE_CURRENT_FILE_NAME, fileName);
     pathStr = pathStr.replace(PATH_VARIABLE_CURRENT_FILE_NAME_WITHOUT_EXT, fileNameWithoutExt);

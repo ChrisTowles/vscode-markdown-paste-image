@@ -2,6 +2,39 @@
 import * as path from 'path';
 import * as fse from 'fs-extra';
 
+
+export const ensureFileAndGetItsDirectory = async (filePath: string): Promise<string> => {
+
+    if (await fse.pathExists (filePath)) {
+        
+        let folderStat = await fse.stat(filePath)
+        if (folderStat.isDirectory()){
+            throw new Error(`Not a file but instead a directory: ${filePath}`);
+        }
+    } else {
+        throw new Error(`File not found: ${filePath}`);
+    }
+    return path.dirname(filePath);
+
+}
+
+
+export const ensurePathIsDirectory = async (dirPath: string): Promise<string> => {
+
+    if (await fse.pathExists (dirPath)) {
+        
+        let folderStat = await fse.stat(dirPath)
+        if (!folderStat.isDirectory()){
+            throw new Error(`Path is file instead of a directory: ${dirPath}`);
+        }
+    } else {
+        throw new Error(`Path not found: ${dirPath}`);
+    }
+    return dirPath;
+
+}
+
+
 export const createImageDirWithImagePath = async (imagePath: string): Promise<string> => {
 
     let imageDir = path.dirname(imagePath);

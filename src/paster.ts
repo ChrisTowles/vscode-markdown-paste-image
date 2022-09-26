@@ -9,7 +9,7 @@ import { DateTime } from 'luxon';
 import { win32CreateImageWithPowershell } from './osTools/win32';
 import { macCreateImageWithAppleScript } from './osTools/macOS';
 import { SaveClipboardImageToFileResult } from './dto/SaveClipboardImageToFileResult';
-import { Configuration, parseConfigurationToConfig } from './configuration';
+import { Configuration, FilePathConfirmInputBoxModeEnum, parseConfigurationToConfig } from './configuration';
 import { Constants } from './constants';
 import { renderTextWithImagePath } from './renderTextWithImagePath';
 
@@ -17,8 +17,7 @@ import { renderTextWithImagePath } from './renderTextWithImagePath';
 export class Paster {
 
 
-    static FILE_PATH_CONFIRM_INPUT_BOX_MODE_ONLY_NAME = "onlyName";
-    static FILE_PATH_CONFIRM_INPUT_BOX_MODE_PULL_PATH = "fullPath";
+  
 
     public static async paste(logger: ILogger): Promise<void> {
         // get current edit file path
@@ -36,11 +35,11 @@ export class Paster {
         }
 
         let editorOpenFilePath = fileUri.fsPath;
-        let projectPath = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
+        let projectRootDirPath = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
 
-        logger.log(`projectPath            = ${projectPath}`);
+        logger.log(`projectPath            = ${projectRootDirPath}`);
         logger.log(`editorOpenFilePath     = ${editorOpenFilePath}`);
-        if (projectPath === '')
+        if (projectRootDirPath === '')
             return;
 
 
@@ -56,8 +55,8 @@ export class Paster {
         let config: Configuration;
         try {
 
-            config = parseConfigurationToConfig({
-                projectPath,
+            config = await parseConfigurationToConfig({
+                projectRootDirPath,
                 editorOpenFilePath,
                 configuration: vscode.workspace.getConfiguration(Constants.ConfigurationName)
             });
@@ -112,7 +111,7 @@ export class Paster {
                 return;
             }
 
-            imagePath = renderTextWithImagePath({ languageId: editor.document.languageId, config, imageFilePath: imagePath, logger });
+            imagePath = await renderTextWithImagePath({ languageId: editor.document.languageId, config, imageFilePath: imagePath, logger });
 
             editor.edit((edit) => {
                 let current = editor.selection;
@@ -151,7 +150,7 @@ export class Paster {
         imageFileName = ensurePngAddedToFileName(imageFileName);
 
         let filePathOrName;
-        if (config.filePathConfirmInputBoxMode == Paster.FILE_PATH_CONFIRM_INPUT_BOX_MODE_PULL_PATH) {
+        if (config.filePathConfirmInputBoxMode === FilePathConfirmInputBoxModeEnum.FULL_PATH) {
             filePathOrName = makeImagePath({ fileName: imageFileName, imageFolderPath: config.imageFolderPath, editorOpenFilePath: editorOpenFilePath });
         } else {
             filePathOrName = imageFileName;
@@ -166,10 +165,15 @@ export class Paster {
 
             if (userEnteredFileName) {
                 userEnteredFileName = ensurePngAddedToFileName(userEnteredFileName);
-
-                if (config.filePathConfirmInputBoxMode == Paster.FILE_PATH_CONFIRM_INPUT_BOX_MODE_ONLY_NAME) {
+                
+                
+                logger.debug(`userEnteredFileName          = ${userEnteredFileName}`);
+                if (config.filePathConfirmInputBoxMode === FilePathConfirmInputBoxModeEnum.ONLY_NAME) {
                     filePathOrName = makeImagePath({ fileName: userEnteredFileName, imageFolderPath: config.imageFolderPath, editorOpenFilePath: editorOpenFilePath });
+                } else {
+                    filePathOrName = userEnteredFileName
                 }
+
             }
 
         } else {

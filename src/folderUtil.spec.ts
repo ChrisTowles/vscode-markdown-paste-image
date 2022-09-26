@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createImageDirWithImagePath, ensurePngAddedToFileName, makeImagePath, } from './folderUtil'
+import { createImageDirWithImagePath, ensureFileAndGetItsDirectory, ensurePathIsDirectory, ensurePngAddedToFileName, makeImagePath, } from './folderUtil'
 import * as path from 'path';
 
 import * as fse from 'fs-extra';
@@ -28,7 +28,7 @@ describe('FolderUtil', () => {
         })
 
         it('create folder 01', async () => {
-            const testPath = path.join(__dirname, '..', 'dist', 'not-real-folder', 'notRealImage.png').toString();
+            const testPath = path.join(__dirname, '..', 'playground', 'folder-test', 'test-to-remove', 'notRealImage.png').toString();
             const testDir = path.dirname(testPath);
 
 
@@ -37,7 +37,7 @@ describe('FolderUtil', () => {
             // clean up created folder
             let folderStat = await fse.stat(testDir)
             if (folderStat.isDirectory()) {
-                await fse.rmdir(testDir);
+                await fse.rmdir(testDir, { recursive: true });
             }
         })
     });
@@ -67,6 +67,28 @@ describe('FolderUtil', () => {
     })
 
 
-    makeImagePath
+    it('ensureFileAndGetItsDirectory', async () => {
+        const dirName = await ensureFileAndGetItsDirectory(__filename);
+        expect(dirName).toBe(__dirname)
+    })
+
+
+    it('ensureFileAndGetItsDirectory - if given directory', async () => {
+        
+        await expect(ensureFileAndGetItsDirectory(__dirname)).rejects.toThrow('Not a file but instead a directory:');
+    })
+
+
+    it('ensurePathIsDirectory', async () => {
+        const dirName = await ensurePathIsDirectory(__dirname);
+        expect(dirName).toBe(__dirname)
+    })
+
+
+    it('ensurePathIsDirectory - if given fileName', async () => {
+        
+        await expect(ensurePathIsDirectory(__filename)).rejects.toThrow('Path is file instead of a directory:');
+    })
+    
 
 })
