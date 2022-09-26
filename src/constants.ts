@@ -7,17 +7,18 @@ export class Constants {
 
 
     // Configuration Params constants
-    public static Config_DefaultName = 'defaultName';
-    public static Config_FolderPath = 'folderPath';
-    public static Config_BasePath = 'basePath'
-    public static Config_Prefix = 'prefix';
-    public static Config_Suffix = 'suffix';
-    public static Config_ForceUnixStyleSeparator = 'forceUnixStyleSeparator';
+    public static Config_DefaultImageName = 'defaultImageName';
+    public static Config_ImageFolderPath = 'imageFolderPath';
+    
+    
     public static Config_EncodePath =  'encodePath';
-    public static Config_NamePrefix =  'namePrefix';
-    public static Config_NameSuffix =  'nameSuffix';
+    public static Config_ImageNamePrefix =  'imageNamePrefix';
+    public static Config_ImageNameSuffix =  'imageNameSuffix';
     public static Config_InsertPattern =  'insertPattern';
     public static Config_ShowFilePathConfirmInputBox=  'showFilePathConfirmInputBox';
     public static Config_FilePathConfirmInputBoxMode =  'filePathConfirmInputBoxMode';
+
+    public static Config_ImageUriPathPrefix = 'imageUriPathPrefix';
+    public static Config_ImageUriPathSuffix = 'imageUriPathSuffix';
 
 }

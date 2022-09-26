@@ -47,7 +47,7 @@ describe('FolderUtil', () => {
 
 
         expect(await makeImagePath({
-            folderPathConfig: "docs/img",
+            imageFolderPath: "docs/img",
             fileName: 'notRealFile.png',
             editorOpenFilePath: testPath
         })).contain('/src/docs/img/notRealFile.png')
@@ -65,5 +65,8 @@ describe('FolderUtil', () => {
     it('ensurePngAddedToFileName - already had but not lower case', async () => {
         expect(ensurePngAddedToFileName('file.PnG')).toBe('file.PnG')
     })
+
+
+    makeImagePath
 
 })

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fse from 'fs-extra';
 import * as upath from 'upath';
-import { ILogger } from './logger';
+import { ILogger, Logger } from './logger';
 import { createImageDirWithImagePath, ensurePngAddedToFileName, makeImagePath } from './folderUtil';
 import { linuxCreateImageWithXClip } from './osTools/linux';
 import { DateTime } from 'luxon';
@@ -11,17 +11,13 @@ import { macCreateImageWithAppleScript } from './osTools/macOS';
 import { SaveClipboardImageToFileResult } from './dto/SaveClipboardImageToFileResult';
 import { Configuration, parseConfigurationToConfig } from './configuration';
 import { Constants } from './constants';
+import { renderTextWithImagePath } from './renderTextWithImagePath';
 
 
 export class Paster {
 
 
-    static PATH_VARIABLE_IMAGE_FILE_PATH = /\$\{imageFilePath\}/g;
-    static PATH_VARIABLE_IMAGE_ORIGINAL_FILE_PATH = /\$\{imageOriginalFilePath\}/g;
-    static PATH_VARIABLE_IMAGE_FILE_NAME = /\$\{imageFileName\}/g;
-    static PATH_VARIABLE_IMAGE_FILE_NAME_WITHOUT_EXT = /\$\{imageFileNameWithoutExt\}/g;
-    static PATH_VARIABLE_IMAGE_SYNTAX_PREFIX = /\$\{imageSyntaxPrefix\}/g;
-    static PATH_VARIABLE_IMAGE_SYNTAX_SUFFIX = /\$\{imageSyntaxSuffix\}/g;
+
 
     static FILE_PATH_CONFIRM_INPUT_BOX_MODE_ONLY_NAME = "onlyName";
     static FILE_PATH_CONFIRM_INPUT_BOX_MODE_PULL_PATH = "fullPath";
@@ -119,7 +115,7 @@ export class Paster {
                 return;
             }
 
-            imagePath = this.renderFilePath(editor.document.languageId, config, imagePath);
+            imagePath = renderTextWithImagePath({ languageId: editor.document.languageId, config, imageFilePath: imagePath, logger });
 
             editor.edit((edit) => {
                 let current = editor.selection;
@@ -145,17 +141,21 @@ export class Paster {
 
         // image file name
         let imageFileName = "";
-        if (!selectText) {
-            imageFileName = config.namePrefixConfig + DateTime.now().toFormat(config.defaultNameConfig) + config.nameSuffixConfig;
-
+        if (selectText && selectText.trim().length > 0) {
+            imageFileName = selectText
         } else {
-            imageFileName = config.namePrefixConfig + selectText + config.nameSuffixConfig;
+            imageFileName = DateTime.now().toFormat(config.defaultImageName);
         }
+        
+        // add prefix and suffix
+        imageFileName = config.imageNamePrefix + imageFileName + config.imageNameSuffix; 
+
+        // ensure ends with ".png"
         imageFileName = ensurePngAddedToFileName(imageFileName);
 
         let filePathOrName;
         if (config.filePathConfirmInputBoxMode == Paster.FILE_PATH_CONFIRM_INPUT_BOX_MODE_PULL_PATH) {
-            filePathOrName = makeImagePath({ fileName: imageFileName, folderPathConfig: config.folderPathConfig, editorOpenFilePath: editorOpenFilePath });
+            filePathOrName = makeImagePath({ fileName: imageFileName, imageFolderPath: config.imageFolderPath, editorOpenFilePath: editorOpenFilePath });
         } else {
             filePathOrName = imageFileName;
         }
@@ -171,12 +171,12 @@ export class Paster {
                 userEnteredFileName = ensurePngAddedToFileName(userEnteredFileName);
 
                 if (config.filePathConfirmInputBoxMode == Paster.FILE_PATH_CONFIRM_INPUT_BOX_MODE_ONLY_NAME) {
-                    filePathOrName = makeImagePath({ fileName: userEnteredFileName, folderPathConfig: config.folderPathConfig, editorOpenFilePath: editorOpenFilePath });
+                    filePathOrName = makeImagePath({ fileName: userEnteredFileName, imageFolderPath: config.imageFolderPath, editorOpenFilePath: editorOpenFilePath });
                 }
             }
 
         } else {
-            filePathOrName = makeImagePath({ fileName: imageFileName, folderPathConfig: config.folderPathConfig, editorOpenFilePath: editorOpenFilePath });
+            filePathOrName = makeImagePath({ fileName: imageFileName, imageFolderPath: config.imageFolderPath, editorOpenFilePath: editorOpenFilePath });
         }
 
         logger.debug(`editorOpenFilePath          = ${editorOpenFilePath}`);
@@ -211,57 +211,7 @@ export class Paster {
         return result;
     }
 
-    /**
-     * render the image file path dependent on file type
-     * e.g. in markdown image file path will render to ![](path)
-     */
-    public static renderFilePath(languageId: string, config: Configuration, imageFilePath: string): string {
-        if (config.basePathConfig) {
-            imageFilePath = path.relative(config.basePathConfig, imageFilePath);
-        }
-
-        if (config.forceUnixStyleSeparatorConfig) {
-            imageFilePath = upath.normalize(imageFilePath);
-        }
-
-        let originalImagePath = imageFilePath;
-        let ext = path.extname(originalImagePath);
-        let fileName = path.basename(originalImagePath);
-        let fileNameWithoutExt = path.basename(originalImagePath, ext);
-
-        imageFilePath = `${config.prefixConfig}${imageFilePath}${config.suffixConfig}`;
-
-        if (config.encodePathConfig == "urlEncode") {
-            imageFilePath = encodeURI(imageFilePath)
-        } else if (config.encodePathConfig == "urlEncodeSpace") {
-            imageFilePath = imageFilePath.replace(/ /g, "%20");
-        }
-
-        let imageSyntaxPrefix = "";
-        let imageSyntaxSuffix = ""
-        switch (languageId) {
-            case "markdown":
-                imageSyntaxPrefix = `![](`
-                imageSyntaxSuffix = `)`
-                break;
-            case "asciidoc":
-                imageSyntaxPrefix = `image::`
-                imageSyntaxSuffix = `[]`
-                break;
-        }
-
-        let result = config.insertPatternConfig
-        result = result.replace(this.PATH_VARIABLE_IMAGE_SYNTAX_PREFIX, imageSyntaxPrefix);
-        result = result.replace(this.PATH_VARIABLE_IMAGE_SYNTAX_SUFFIX, imageSyntaxSuffix);
-
-        result = result.replace(this.PATH_VARIABLE_IMAGE_FILE_PATH, imageFilePath);
-        result = result.replace(this.PATH_VARIABLE_IMAGE_ORIGINAL_FILE_PATH, originalImagePath);
-        result = result.replace(this.PATH_VARIABLE_IMAGE_FILE_NAME, fileName);
-        result = result.replace(this.PATH_VARIABLE_IMAGE_FILE_NAME_WITHOUT_EXT, fileNameWithoutExt);
-
-        return result;
-    }
-
+    
 
 }
 

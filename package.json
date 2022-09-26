@@ -35,45 +35,36 @@
       "type": "object",
       "title": "Paste Image Configuration",
       "properties": {
-        "pasteImage.folderPath": {
+        "pasteImage.imageFolderPath": {
           "type": "string",
           "default": "${currentFileDir}",
-          "description": "The destination to save image file.You can use variable ${currentFileDir} and ${projectRoot}. ${currentFileDir} will be replace by the path of directory that contain current editing file. ${projectRoot} will be replace by path of the project opened in vscode."
+          "description": "The destination to save image file.  You can use variable ${currentFileDir} and ${projectRoot}. ${currentFileDir} will be replace by the path of directory that contain current editing file. ${projectRoot} will be replace by path of the project opened in vscode."
         },
-        "pasteImage.basePath": {
-          "type": "string",
-          "default": "${currentFileDir}",
-          "description": "The base path of image url.You can use variable ${currentFileDir} and ${projectRoot}. ${currentFileDir} will be replace by the path of directory that contain current editing file. ${projectRoot} will be replace by path of the project opened in vscode. If you set basePath to empty String, it will insert absolute path to file."
-        },
-        "pasteImage.forceUnixStyleSeparator": {
-          "type": "boolean",
-          "default": true,
-          "description": "Force set the file separator style to unix style. If set false, separator style will follow the system style."
-        },
-        "pasteImage.prefix": {
-          "type": "string",
-          "default": "",
-          "description": "The string prepend to the resolved image path before paste."
-        },
-        "pasteImage.suffix": {
-          "type": "string",
-          "default": "",
-          "description": "The string append to the resolved image path before paste."
-        },
-        "pasteImage.defaultName": {
+       
+        "pasteImage.defaultImageName": {
           "type": "string",
           "default": "yyyy-LL-mm-HH-mm-ss",
           "description": "The default image file name. The value of this config will be pass to the 'format' function of moment library(a js time manipulation library), you can read document https://moment.github.io/luxon/#/formatting?id=table-of-tokens for advanced usage."
         },
-        "pasteImage.namePrefix": {
+        "pasteImage.imageNamePrefix": {
           "type": "string",
           "default": "",
           "description": "The string prepend to the image file name."
         },
-        "pasteImage.nameSuffix": {
+        "pasteImage.imageNameSuffix": {
           "type": "string",
           "default": "",
           "description": "The string append to the image file name."
+        },
+        "pasteImage.imageUriPathPrefix": {
+          "type": "string",
+          "default": "",
+          "description": "The string prepend to the resolved image path. Can be used if you want to supply a custom domain to image url."
+        },
+        "pasteImage.imageUriPathSuffix": {
+          "type": "string",
+          "default": "",
+          "description": "The string append to the resolved image path. Can be used if you want to supply a custom params to image url."
         },
         "pasteImage.encodePath": {
           "type": "string",
@@ -92,7 +83,7 @@
         },
         "pasteImage.showFilePathConfirmInputBox": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Set to true if you want to be able to change the file path or name prior to saving the file to disk"
         },
         "pasteImage.filePathConfirmInputBoxMode": {

@@ -4,86 +4,79 @@ import path from "path";
 import { ILogger } from "./logger";
 
 export interface Configuration {
-    prefixConfig: string;
-    suffixConfig: string;
-    forceUnixStyleSeparatorConfig: boolean;
+    
     encodePathConfig: string;
-    namePrefixConfig: string;
-    nameSuffixConfig: string;
+
     insertPatternConfig: string;
     showFilePathConfirmInputBox: boolean,
     filePathConfirmInputBoxMode: string;
-    defaultNameConfig: string;
-    folderPathConfig: string;
-    basePathConfig: string;
+    
+
+    defaultImageName: string;
+    imageFolderPath: string;
+
+    // used to prefix and suffix the image name
+    imageNamePrefix: string;
+    imageNameSuffix: string;
+    
+    // used for image url prefix and suffix
+    imageUriPathPrefix: string;
+    imageUriPathSuffix: string;
 
 }
 
 export const parseConfigurationToConfig = ({ projectPath, editorOpenFilePath, configuration }: { projectPath: string; editorOpenFilePath: string; configuration: WorkspaceConfiguration }): Configuration => {
 
-    let defaultNameConfig = configuration.get<string>(Constants.Config_DefaultName);
-    let folderPathConfig = configuration.get<string>(Constants.Config_FolderPath);
-    let basePathConfig = configuration.get<string>(Constants.Config_BasePath);
-    let prefixConfig = configuration.get<string>(Constants.Config_Prefix, '');
-    let suffixConfig = configuration.get<string>(Constants.Config_Suffix, '');
-    let forceUnixStyleSeparatorConfig = configuration.get<boolean>(Constants.Config_ForceUnixStyleSeparator);
+    // Luxon Values used in ImageName = https://moment.github.io/luxon/#/formatting?id=table-of-tokens
+    let defaultImageName = configuration.get<string>(Constants.Config_DefaultImageName, "yyyy-LL-dd-HH-mm-ss");
+    let imageFolderPath = configuration.get<string>(Constants.Config_ImageFolderPath, "${currentFileDir}");
+       
 
     let encodePathConfig = configuration.get<string>(Constants.Config_EncodePath, '');
-    let namePrefixConfig = configuration.get<string>(Constants.Config_NamePrefix, '');
-    let nameSuffixConfig = configuration.get<string>(Constants.Config_NameSuffix, '');
     let insertPatternConfig = configuration.get<string>(Constants.Config_InsertPattern, '');
-    let showFilePathConfirmInputBox = configuration.get<boolean>(Constants.Config_ShowFilePathConfirmInputBox) || false;
-    let filePathConfirmInputBoxMode = configuration.get<string>(Constants.Config_FilePathConfirmInputBoxMode) || "inputBox";
 
-    // load config pasteImage.defaultName
 
-    if (!defaultNameConfig) {
-        defaultNameConfig = "yyyy-LL-dd-HH-mm-ss" //https://moment.github.io/luxon/#/formatting?id=table-of-tokens
-    }
+    let imageUriPathPrefix = configuration.get<string>(Constants.Config_ImageUriPathPrefix, '');
+    let imageUriPathSuffix = configuration.get<string>(Constants.Config_ImageUriPathSuffix, '');
+    let imageNamePrefix = configuration.get<string>(Constants.Config_ImageNamePrefix, '');
+    let imageNameSuffix = configuration.get<string>(Constants.Config_ImageNameSuffix, '');
+    
+    let showFilePathConfirmInputBox = configuration.get<boolean>(Constants.Config_ShowFilePathConfirmInputBox, true);
+    let filePathConfirmInputBoxMode = configuration.get<string>(Constants.Config_FilePathConfirmInputBoxMode, "inputBox");
 
-    // load config pasteImage.path
-    if (!folderPathConfig) {
-        folderPathConfig = "${currentFileDir}";
-    }
-    if (folderPathConfig.length !== folderPathConfig.trim().length) {
-        const errorMsg = `The config ${Constants.ConfigurationName}.path = '${folderPathConfig}' is invalid. please check your config.`;
+
+    if (imageFolderPath.length !== imageFolderPath.trim().length) {
+        const errorMsg = `The config ${Constants.ConfigurationName}.path = '${imageFolderPath}' is invalid. please check your config.`;
         throw new Error(errorMsg);
     }
+    
 
-    if (!basePathConfig) {
-        basePathConfig = "";
-    }
-
-    if (basePathConfig.length !== basePathConfig.trim().length) {
-        const errorMsg = `The config pasteImage.path = '${basePathConfig}' is invalid. please check your config.`;
-        throw new Error(errorMsg);
-    }
-
-    forceUnixStyleSeparatorConfig = !!forceUnixStyleSeparatorConfig;
-
-    defaultNameConfig = replacePathVariable({ pathStr: defaultNameConfig, projectRoot: projectPath, editorOpenFilePath: editorOpenFilePath });
-    folderPathConfig = replacePathVariable({ pathStr: folderPathConfig, projectRoot: projectPath, editorOpenFilePath: editorOpenFilePath });
-    basePathConfig = replacePathVariable({ pathStr: basePathConfig, projectRoot: projectPath, editorOpenFilePath: editorOpenFilePath });
-    namePrefixConfig = replacePathVariable({ pathStr: namePrefixConfig, projectRoot: projectPath, editorOpenFilePath: editorOpenFilePath });
-    nameSuffixConfig = replacePathVariable({ pathStr: nameSuffixConfig, projectRoot: projectPath, editorOpenFilePath: editorOpenFilePath });
+    defaultImageName = replacePathVariable({ pathStr: defaultImageName, projectRoot: projectPath, editorOpenFilePath: editorOpenFilePath });
+    imageFolderPath = replacePathVariable({ pathStr: imageFolderPath, projectRoot: projectPath, editorOpenFilePath: editorOpenFilePath });
+    imageNamePrefix = replacePathVariable({ pathStr: imageNamePrefix, projectRoot: projectPath, editorOpenFilePath: editorOpenFilePath });
+    imageNameSuffix = replacePathVariable({ pathStr: imageNameSuffix, projectRoot: projectPath, editorOpenFilePath: editorOpenFilePath });
     insertPatternConfig = replacePathVariable({ pathStr: insertPatternConfig, projectRoot: projectPath, editorOpenFilePath: editorOpenFilePath });
 
 
     const config: Configuration = {
 
         // load other config
-        defaultNameConfig: defaultNameConfig,
-        prefixConfig: prefixConfig,
-        suffixConfig: suffixConfig,
-        forceUnixStyleSeparatorConfig: forceUnixStyleSeparatorConfig,
+        defaultImageName: defaultImageName,
+        imageFolderPath: imageFolderPath,
+
         encodePathConfig: encodePathConfig,
-        namePrefixConfig: namePrefixConfig,
-        nameSuffixConfig: nameSuffixConfig,
+        
         insertPatternConfig: insertPatternConfig,
         showFilePathConfirmInputBox: showFilePathConfirmInputBox,
         filePathConfirmInputBoxMode: filePathConfirmInputBoxMode,
-        folderPathConfig: folderPathConfig,
-        basePathConfig: basePathConfig,
+        
+        
+
+        imageNamePrefix: imageNamePrefix,
+        imageNameSuffix: imageNameSuffix,
+
+        imageUriPathPrefix: imageUriPathPrefix,
+        imageUriPathSuffix: imageUriPathSuffix,
 
     };
 
