@@ -17,11 +17,8 @@ import { renderTextWithImagePath } from './renderTextWithImagePath';
 export class Paster {
 
 
-
-
     static FILE_PATH_CONFIRM_INPUT_BOX_MODE_ONLY_NAME = "onlyName";
     static FILE_PATH_CONFIRM_INPUT_BOX_MODE_PULL_PATH = "fullPath";
-
 
     public static async paste(logger: ILogger): Promise<void> {
         // get current edit file path

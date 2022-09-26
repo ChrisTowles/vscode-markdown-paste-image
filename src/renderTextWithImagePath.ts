@@ -20,8 +20,8 @@ export const renderTextWithImagePath = ({ languageId, config, imageFilePath, log
     logger.debug('renderFilePath start');
     logger.debug('config.imageFolderPath         = ' + config.imageFolderPath);
     logger.debug('imageFilePath                  = ' + imageFilePath);
-    imageFilePath = path.relative(config.imageFolderPath, imageFilePath);
-    
+    imageFilePath = path.relative(config.editorOpenFileFolderPath, imageFilePath);
+
     logger.debug('imageFilePath  after relative  = ' + imageFilePath);
     //Normalize a string path, reducing '..' and '.' parts.
     // * When multiple slashes are found, they're replaced by a single one; when the path contains a trailing slash, it is preserved. On Windows backslashes are used.

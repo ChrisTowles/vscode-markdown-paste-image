@@ -5,23 +5,25 @@ import { ILogger } from "./logger";
 
 export interface Configuration {
     
-    encodePathConfig: string;
+    readonly encodePathConfig: string;
 
-    insertPatternConfig: string;
-    showFilePathConfirmInputBox: boolean,
-    filePathConfirmInputBoxMode: string;
+    readonly insertPatternConfig: string;
+    readonly showFilePathConfirmInputBox: boolean,
+    readonly filePathConfirmInputBoxMode: string;
     
 
-    defaultImageName: string;
-    imageFolderPath: string;
+    readonly defaultImageName: string;
+    readonly imageFolderPath: string;
 
     // used to prefix and suffix the image name
-    imageNamePrefix: string;
-    imageNameSuffix: string;
+    readonly imageNamePrefix: string;
+    readonly imageNameSuffix: string;
     
     // used for image url prefix and suffix
-    imageUriPathPrefix: string;
-    imageUriPathSuffix: string;
+    readonly imageUriPathPrefix: string;
+    readonly imageUriPathSuffix: string;
+    readonly projectRootPath: string;
+    readonly editorOpenFileFolderPath: string;
 
 }
 
@@ -77,6 +79,8 @@ export const parseConfigurationToConfig = ({ projectPath, editorOpenFilePath, co
 
         imageUriPathPrefix: imageUriPathPrefix,
         imageUriPathSuffix: imageUriPathSuffix,
+        projectRootPath: projectPath,
+        editorOpenFileFolderPath: path.dirname(editorOpenFilePath),
 
     };
 
