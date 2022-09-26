@@ -27,9 +27,9 @@ export const createImageDirWithImagePath = async (imagePath: string): Promise<st
      * create directory for image when directory does not exist
      */
 
-export const makeImagePath = ({ folderPathConfig, fileName, filePath }: { folderPathConfig: string; fileName: string; filePath: string; }): string => {
+export const makeImagePath = ({ folderPathConfig, fileName, editorOpenFilePath }: { folderPathConfig: string; fileName: string; editorOpenFilePath: string; }): string => {
     // image output path
-    let folderPath = path.dirname(filePath);
+    let folderPath = path.dirname(editorOpenFilePath);
     let imagePath = "";
 
     // generate image path

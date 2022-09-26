@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { WorkspaceConfiguration, ConfigurationTarget } from 'vscode';
 import { Constants } from "./constants";
-import { parseConfigurationToConfig } from "./configuration";
-
+import { parseConfigurationToConfig, replacePathVariable } from "./configuration";
+import path from 'path';
 
 
 class WorkspaceConfigurationMock implements WorkspaceConfiguration {
@@ -18,9 +18,7 @@ class WorkspaceConfigurationMock implements WorkspaceConfiguration {
   }
   get<T>(section: string, defaultValue?: T): T | undefined {
 
-    if(defaultValue !== undefined) {
-        throw new Error("Logic for defaultValue not implemented.");
-    }
+
 
     let result: string | boolean;
 
@@ -64,6 +62,7 @@ class WorkspaceConfigurationMock implements WorkspaceConfiguration {
         default:
             throw new Error(`No Mock provided for Config ${section}.`);
     }
+
     return result as T;
   }
 }
@@ -81,16 +80,145 @@ describe('Configuration', () => {
         const vsWorkspaceConfiguration = new WorkspaceConfigurationMock();
         const config = parseConfigurationToConfig({
             projectPath: __dirname,
-            filePath: __dirname,
+            editorOpenFilePath: __dirname,
             configuration: vsWorkspaceConfiguration,
         })
 
         expect(config.basePathConfig).toBe(__dirname);
-        expect(config.suffixConfig).toBe('');
-        //expect(config.forceUnixStyleSeparatorConfig).toBeTruthy();
 
-        //expect(config.showFilePathConfirmInputBox).toBeTruthy();
 
 
     })
+
+
+    it('replacePathVariable - no replacement done', () => {
+        const originalPath = `/dir1/dir2`
+        const editorFile = path.join(__dirname, 'test', 'test.md');
+        const alteredValue = replacePathVariable({
+         pathStr: originalPath,
+         editorOpenFilePath: editorFile,
+         projectRoot: __dirname,
+        })
+
+        // no replacement done
+        expect(alteredValue).toBe(originalPath);
+
+    })
+
+    it('replacePathVariable - replace with edit file\'s folder', () => {
+        const originalPath = '${currentFileDir}'
+        const editorFile = path.join(__dirname, 'test', 'test.md');
+        const alteredValue = replacePathVariable({
+         pathStr: originalPath,
+         editorOpenFilePath: editorFile,
+         projectRoot: __dirname,
+        })
+
+        // should replace with folder of editor file
+        expect(alteredValue).toBe(path.dirname(editorFile));
+
+    })
+
+
+    it('replacePathVariable - replace with edit file\'s folder and append another folder', () => {
+        const originalPath = '${currentFileDir}/test2Folder'
+        const editorFile = path.join(__dirname, 'test', 'test.md');
+        const alteredValue = replacePathVariable({
+         pathStr: originalPath,
+         editorOpenFilePath: editorFile,
+         projectRoot: __dirname,
+        })
+
+        // should replace with folder of editor file and append another folder
+        const targetFolder = path.join(path.dirname(editorFile), 'test2Folder');
+        expect(alteredValue).toBe(targetFolder);
+
+    })
+
+    it('replacePathVariable - replace with projectRoot', () => {
+        const originalPath = '${projectRoot}'
+        const editorFile = path.join(__dirname, 'test', 'test.md');
+        const productRoot = __dirname;
+
+        const alteredValue = replacePathVariable({
+         pathStr: originalPath,
+         editorOpenFilePath: editorFile,
+         projectRoot: productRoot,
+        })
+
+        // should replace with folder of editor file
+        expect(alteredValue).toBe(productRoot);
+    })
+
+    it('replacePathVariable - replace with projectRoot', () => {
+        const originalPath = '${projectRoot}'
+        const editorFile = path.join(__dirname, 'test', 'test.md');
+        const productRoot = __dirname;
+        
+        const alteredValue = replacePathVariable({
+         pathStr: originalPath,
+         editorOpenFilePath: editorFile,
+         projectRoot: productRoot,
+        })
+
+        // should replace with folder of editor file
+        expect(alteredValue).toBe(productRoot);
+    })
+
+
+    it('replacePathVariable - replace with currentFileName', () => {
+        const originalPath = '${currentFileName}'
+        const editorFile = path.join(__dirname, 'test', 'test.md');
+        const productRoot = __dirname;
+        
+        const alteredValue = replacePathVariable({
+         pathStr: originalPath,
+         editorOpenFilePath: editorFile,
+         projectRoot: productRoot,
+        })
+
+        // should replace with editor
+        expect(alteredValue).toBe(path.basename(editorFile));
+    })
+
+
+
+    it('replacePathVariable - replace with currentFileNameWithoutExt', () => {
+        const originalPath = '${currentFileNameWithoutExt}'
+        const editorFile = path.join(__dirname, 'test', 'test.md');
+        const productRoot = __dirname;
+        
+        const alteredValue = replacePathVariable({
+         pathStr: originalPath,
+         editorOpenFilePath: editorFile,
+         projectRoot: productRoot,
+        })
+
+        let ext = path.extname(editorFile);
+        let fileNameWithoutExt = path.basename(editorFile, ext);
+
+        // should replace with editor filename without ext
+        expect(alteredValue).toBe(fileNameWithoutExt);
+    })
+
+    it('replacePathVariable - replace with projectRoot and currentFileNameWithoutExt', () => {
+        const originalPath = '${projectRoot}/${currentFileNameWithoutExt}.png'
+        const editorFile = path.join(__dirname, 'test', 'test.md');
+        const productRoot = __dirname;
+        
+        const alteredValue = replacePathVariable({
+         pathStr: originalPath,
+         editorOpenFilePath: editorFile,
+         projectRoot: productRoot,
+        })
+
+        let ext = path.extname(editorFile);
+        let fileNameWithoutExt = path.basename(editorFile, ext);
+        
+        // should replace with editor filename without ext
+        expect(alteredValue).toBe(path.join(productRoot, `${fileNameWithoutExt}.png`));
+    })
+
+
+
 });

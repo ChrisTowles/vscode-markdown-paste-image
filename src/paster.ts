@@ -42,11 +42,11 @@ export class Paster {
             return;
         }
 
-        let filePath = fileUri.fsPath;
+        let editorOpenFilePath = fileUri.fsPath;
         let projectPath = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
 
-        logger.log(`projectPath = ${projectPath}`);
-        logger.log(`fileUri     = ${fileUri}`);
+        logger.log(`projectPath            = ${projectPath}`);
+        logger.log(`editorOpenFilePath     = ${editorOpenFilePath}`);
         if (projectPath === '')
             return;
 
@@ -65,7 +65,7 @@ export class Paster {
 
             config = parseConfigurationToConfig({
                 projectPath,
-                filePath,
+                editorOpenFilePath,
                 configuration: vscode.workspace.getConfiguration(Constants.ConfigurationName)
             });
 
@@ -77,7 +77,7 @@ export class Paster {
 
         // replace variable in config
 
-        const imagePath = await this.getImagePath({ filePath, selectText, config: config, logger })
+        const imagePath = await this.getImagePath({ editorOpenFilePath, selectText, config: config, logger })
         try {
             // is the file existed?
             let fileAlreadyExisted = await fse.existsSync(imagePath);
@@ -139,7 +139,7 @@ export class Paster {
         logger.debug('saveAndPaste end');
     }
 
-    public static async getImagePath({ filePath, selectText, config, logger }: { filePath: string; selectText: string; config: Configuration, logger: ILogger }): Promise<string> {
+    public static async getImagePath({ editorOpenFilePath, selectText, config, logger }: { editorOpenFilePath: string; selectText: string; config: Configuration, logger: ILogger }): Promise<string> {
 
         logger.debug('getImagePath start');
 
@@ -155,7 +155,7 @@ export class Paster {
 
         let filePathOrName;
         if (config.filePathConfirmInputBoxMode == Paster.FILE_PATH_CONFIRM_INPUT_BOX_MODE_PULL_PATH) {
-            filePathOrName = makeImagePath({ fileName: imageFileName, folderPathConfig: config.folderPathConfig, filePath: filePath });
+            filePathOrName = makeImagePath({ fileName: imageFileName, folderPathConfig: config.folderPathConfig, editorOpenFilePath: editorOpenFilePath });
         } else {
             filePathOrName = imageFileName;
         }
@@ -171,15 +171,15 @@ export class Paster {
                 userEnteredFileName = ensurePngAddedToFileName(userEnteredFileName);
 
                 if (config.filePathConfirmInputBoxMode == Paster.FILE_PATH_CONFIRM_INPUT_BOX_MODE_ONLY_NAME) {
-                    filePathOrName = makeImagePath({ fileName: userEnteredFileName, folderPathConfig: config.folderPathConfig, filePath: filePath });
+                    filePathOrName = makeImagePath({ fileName: userEnteredFileName, folderPathConfig: config.folderPathConfig, editorOpenFilePath: editorOpenFilePath });
                 }
             }
 
         } else {
-            filePathOrName = makeImagePath({ fileName: imageFileName, folderPathConfig: config.folderPathConfig, filePath: filePath });
+            filePathOrName = makeImagePath({ fileName: imageFileName, folderPathConfig: config.folderPathConfig, editorOpenFilePath: editorOpenFilePath });
         }
 
-        logger.debug(`filePath                    = ${filePath}`);
+        logger.debug(`editorOpenFilePath          = ${editorOpenFilePath}`);
         logger.debug(`imageFileName               = ${imageFileName}`);
         logger.debug(`filePathOrName              = ${filePathOrName}`);
         logger.debug(`showFilePathConfirmInputBox = ${config.showFilePathConfirmInputBox}`);

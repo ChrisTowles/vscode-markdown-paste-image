@@ -49,7 +49,7 @@ describe('FolderUtil', () => {
         expect(await makeImagePath({
             folderPathConfig: "docs/img",
             fileName: 'notRealFile.png',
-            filePath: testPath
+            editorOpenFilePath: testPath
         })).contain('/src/docs/img/notRealFile.png')
     })
 
