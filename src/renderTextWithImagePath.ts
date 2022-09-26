@@ -4,9 +4,6 @@ import * as upath from 'upath';
 import { ILogger } from './logger';
 import { ensurePathIsDirectory } from "./folderUtil";
 
-
-
-
 /**
      * render the image file path dependent on file type
      * e.g. in markdown image file path will render to ![](path)
@@ -18,17 +15,13 @@ export const getRelativePathFromEditorFile = async ({ editorOpenFolderPath, imag
 
     await ensurePathIsDirectory(editorOpenFolderPath);
 
-    logger.debug(`imageFilePath                  = ${imageFilePath}`);
     imageFilePath = path.relative(editorOpenFolderPath, imageFilePath);
-
-    logger.debug(`imageFilePath  after relative  = ${imageFilePath}`);
     
     // Normalize a string path, reducing '..' and '.' parts. When multiple slashes are 
     // found, they're replaced by a single one; when the path contains a trailing slash, it
     // is preserved. On Windows backslashes are used.
     imageFilePath = upath.normalize(imageFilePath);
-    logger.debug(`imageFilePath  after normalize = ${imageFilePath}`);
-    
+   
     return imageFilePath;
 }
 
@@ -45,14 +38,13 @@ export const renderTextWithImagePath = async ({ languageId, config, imageFilePat
     
     imageFilePath = await getRelativePathFromEditorFile({ editorOpenFolderPath: config.editorOpenFolderPath, imageFilePath, logger });
     let originalImagePath = imageFilePath;
-    logger.debug(`renderFilePath after getRelativePathFromEditorFile - ${imageFilePath}`);
+
     let ext = path.extname(originalImagePath);
     let fileName = path.basename(originalImagePath);
     let fileNameWithoutExt = path.basename(originalImagePath, ext);
     
     imageFilePath = `${config.imageUriPathPrefix}${imageFilePath}${config.imageUriPathSuffix}`;
 
-    logger.debug(`imageFilePath  Uri Pre & Suf   = ${imageFilePath}`);
     
     imageFilePath = encodeImagePath({ imageFilePath, encodePath: config.encodePath });
 

@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import * as path from 'path';
-import util from 'util';
 import { encodeImagePath, getRelativePathFromEditorFile, renderTextWithImagePath } from './renderTextWithImagePath';
 import { MockWorkspaceConfiguration } from './test/mockWorkspaceConfiguration';
 import { Configuration, EncodePathEnum, parseConfigurationToConfig } from './configuration';
 import { MockLogger } from './test/mockLogger';
-import { config } from 'process';
+
 
 
 const createMockConfig = async ({ projectRootDirPath, editorOpenFilePath }: { projectRootDirPath: string, editorOpenFilePath: string }): Promise<Configuration> => {

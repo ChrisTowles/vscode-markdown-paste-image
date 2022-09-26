@@ -1,11 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { WorkspaceConfiguration, ConfigurationTarget } from 'vscode';
 import { Constants } from "./constants";
 import { parseConfigurationToConfig, replacePathVariable } from "./configuration";
 import path from 'path';
 import { MockWorkspaceConfiguration } from './test/mockWorkspaceConfiguration';
-
-
 
 
 describe('Configuration', () => {

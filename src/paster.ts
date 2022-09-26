@@ -1,23 +1,18 @@
-import * as vscode from 'vscode';
-import * as path from 'path';
 import * as fse from 'fs-extra';
-import * as upath from 'upath';
-import { ILogger, Logger } from './logger';
-import { createImageDirWithImagePath, ensurePngAddedToFileName, makeImagePath } from './folderUtil';
-import { linuxCreateImageWithXClip } from './osTools/linux';
 import { DateTime } from 'luxon';
-import { win32CreateImageWithPowershell } from './osTools/win32';
-import { macCreateImageWithAppleScript } from './osTools/macOS';
-import { SaveClipboardImageToFileResult } from './dto/SaveClipboardImageToFileResult';
+import * as vscode from 'vscode';
 import { Configuration, FilePathConfirmInputBoxModeEnum, parseConfigurationToConfig } from './configuration';
 import { Constants } from './constants';
+import { SaveClipboardImageToFileResult } from './dto/SaveClipboardImageToFileResult';
+import { createImageDirWithImagePath, ensurePngAddedToFileName, makeImagePath } from './folderUtil';
+import { ILogger } from './logger';
+import { linuxCreateImageWithXClip } from './osTools/linux';
+import { macCreateImageWithAppleScript } from './osTools/macOS';
+import { win32CreateImageWithPowershell } from './osTools/win32';
 import { renderTextWithImagePath } from './renderTextWithImagePath';
 
 
 export class Paster {
-
-
-  
 
     public static async paste(logger: ILogger): Promise<void> {
         // get current edit file path
@@ -51,7 +46,7 @@ export class Paster {
             return;
         }
 
-        // load other config
+        // load config
         let config: Configuration;
         try {
 
@@ -68,7 +63,6 @@ export class Paster {
         }
 
         // replace variable in config
-
         const imagePath = await this.getImagePath({ editorOpenFilePath, selectText, config: config, logger })
         try {
             // is the file existed?
@@ -85,7 +79,6 @@ export class Paster {
             logger.showErrorMessage(`fs.existsSync(${imagePath}) fail. message=${(err as Error).message}`);
             return;
         }
-
 
         logger.debug('Paste End');
     }
@@ -173,7 +166,6 @@ export class Paster {
                 } else {
                     filePathOrName = userEnteredFileName
                 }
-
             }
 
         } else {

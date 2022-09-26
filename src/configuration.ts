@@ -1,7 +1,6 @@
 import { Constants } from "./constants";
 import { WorkspaceConfiguration } from 'vscode';
 import path from "path";
-import { ILogger } from "./logger";
 import { ensureFileAndGetItsDirectory } from "./folderUtil";
 
 export interface Configuration {
