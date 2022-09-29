@@ -7,7 +7,7 @@ import { SaveClipboardImageToFileResult } from "../dto/SaveClipboardImageToFileR
 export const win32CreateImageWithPowershell = async ({ imagePath, logger }: { imagePath: string; logger: ILogger; }): Promise<SaveClipboardImageToFileResult> => {
 
     // Windows
-    const scriptPath = upath.join(__dirname, '../res/pc.ps1');
+    const scriptPath = upath.join(__dirname, '../res/windows.ps1');
 
     if (! await fse.pathExists(scriptPath)) {
         const errorMsg = `Script file not found: ${scriptPath}`
@@ -17,6 +17,8 @@ export const win32CreateImageWithPowershell = async ({ imagePath, logger }: { im
 
     return new Promise<SaveClipboardImageToFileResult>(async (resolve, reject) => {
 
+
+        let outputData: string = '';
         let command = "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe";
         let powershellExisted = fse.existsSync(command)
         if (!powershellExisted) {
@@ -34,25 +36,35 @@ export const win32CreateImageWithPowershell = async ({ imagePath, logger }: { im
             imagePath
         ]);
         powershell.on('error', function (e) {
-            //if (e.code == "ENOENT") {
-            //    log.showErrorMessage(`The powershell command is not in you PATH environment variables. Please add it and retry.`);
-            //} else {
             logger.showErrorMessage(e.message);
-            reject(e);
-            //}
         });
-        powershell.on('exit', function (code, signal) {
-            // console.log('exit', code, signal);
+
+        powershell.on('exit', async function (code, signal) {
+
+            logger.log(`scriptPath: "${scriptPath}" exit code: ${code} signal: ${signal}`);
+
+            if (code === 0) {
+                resolve({
+                    success: true,
+                    imagePath: imagePath,
+                    noImageInClipboard: false,
+                    scriptOutput: outputData.split('\n'),
+                });
+
+            } else {
+
+                resolve({
+                    success: false,
+                    noImageInClipboard: outputData.includes("warning: no image in clipboard"),
+                    scriptOutput: outputData.split('\n'),
+                });
+            }
         });
-        powershell.stdout.on('data', function (data: Buffer) {
 
-            resolve({
-                success: true,
-                noImageInClipboard: false,
-                imagePath: imagePath,
-                scriptOutput: [data.toString().trim()],
 
-            });
+        powershell.stdout.on('data', async function (data: Buffer) {
+            // save all the output till exit
+            outputData += data.toString().trim() + '\n';
         });
 
 

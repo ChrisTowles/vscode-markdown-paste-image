@@ -35,10 +35,6 @@ export const linuxCreateImageWithXClip = async ({ imagePath, logger }: { imagePa
 
             } else {
 
-                outputData.split('\n').forEach(line => {
-                    logger.log(`script result data: ${line}`);
-                });
-
                 if (outputData.includes("error: no xclip found")) {
                     await logger.showInformationMessage('You need to install "xclip" command app first.');
                 }
