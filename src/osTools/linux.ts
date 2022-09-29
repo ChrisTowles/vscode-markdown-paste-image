@@ -1,56 +1,48 @@
-import { spawn } from "child_process";
-import * as upath from 'upath';
-import * as fse from 'fs-extra';
-import { ILogger } from "../logger";
-import { SaveClipboardImageToFileResult } from "../dto/SaveClipboardImageToFileResult";
-import { ensureFileExistsOrThrow } from "../folderUtil";
+import { spawn } from 'child_process';
+import upath from 'upath';
 
-export const linuxCreateImageWithXClip = async ({ imagePath, logger }: { imagePath: string; logger: ILogger; }): Promise<SaveClipboardImageToFileResult> => {
-    let scriptPath = upath.join(__dirname, '../res/linux.sh');
+import type { ILogger } from '../logger';
+import type { SaveClipboardImageToFileResult } from '../dto/SaveClipboardImageToFileResult';
+import { ensureFileExistsOrThrow } from '../folderUtil';
 
-    await ensureFileExistsOrThrow(scriptPath, logger);
+export const linuxCreateImageWithXClip = async ({ imagePath, logger }: { imagePath: string; logger: ILogger }): Promise<SaveClipboardImageToFileResult> => {
+  const scriptPath = upath.join(__dirname, '../res/linux.sh');
 
-    return new Promise<SaveClipboardImageToFileResult>((resolve, reject) => {
+  await ensureFileExistsOrThrow(scriptPath, logger);
 
+  return new Promise<SaveClipboardImageToFileResult>((resolve) => {
+    let outputData = '';
 
-        let outputData: string = '';
+    const shellScript = spawn('sh', [scriptPath, imagePath]);
+    shellScript.on('error', (e) => {
+      logger.showErrorMessage(e.message);
+    });
+    shellScript.on('exit', async (code, signal) => {
+      logger.log(`scriptPath: "${scriptPath}" exit code: ${code} signal: ${signal}`);
 
-        let shellScript = spawn('sh', [scriptPath, imagePath]);
-        shellScript.on('error', function (e) {
-            logger.showErrorMessage(e.message);
+      if (code === 0) {
+        resolve({
+          success: true,
+          imagePath,
+          noImageInClipboard: false,
+          scriptOutput: outputData.split('\n'),
         });
-        shellScript.on('exit', async function (code, signal) {
-            logger.log(`scriptPath: "${scriptPath}" exit code: ${code} signal: ${signal}`);
+      }
+      else {
+        if (outputData.includes('error: no xclip found'))
+          await logger.showInformationMessage('You need to install "xclip" command app first.');
 
-            if (code === 0) {
-                resolve({
-                    success: true,
-                    imagePath: imagePath,
-                    noImageInClipboard: false,
-                    scriptOutput: outputData.split('\n'),
-                });
-
-            } else {
-
-                if (outputData.includes("error: no xclip found")) {
-                    await logger.showInformationMessage('You need to install "xclip" command app first.');
-                }
-
-                resolve({
-                    success: false,
-                    noImageInClipboard: outputData.includes("warning: no image in clipboard"),
-                    scriptOutput: outputData.split('\n'),
-                });
-            }
-
-
+        resolve({
+          success: false,
+          noImageInClipboard: outputData.includes('warning: no image in clipboard'),
+          scriptOutput: outputData.split('\n'),
         });
-
-        shellScript.stdout.on('data', async function (data: Buffer) {
-            // save all the output till exit
-            outputData += data.toString().trim() + '\n';
-        });
+      }
     });
 
-
-}
+    shellScript.stdout.on('data', async (data: Buffer) => {
+      // save all the output till exit
+      outputData += `${data.toString().trim()}\n`;
+    });
+  });
+};

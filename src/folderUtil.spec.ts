@@ -1,104 +1,83 @@
-import { describe, expect, it } from 'vitest'
-import { createImageDirWithImagePath, ensureFileAndGetItsDirectory, ensureFileExistsOrThrow, ensurePathIsDirectory, ensurePngAddedToFileName, makeImagePath, } from './folderUtil'
+import { describe, expect, it } from 'vitest';
 import * as upath from 'upath';
 
 import * as fse from 'fs-extra';
+import { createImageDirWithImagePath, ensureFileAndGetItsDirectory, ensureFileExistsOrThrow, ensurePathIsDirectory, ensurePngAddedToFileName, makeImagePath } from './folderUtil';
 import { MockLogger } from './test/mockLogger';
 
 describe('FolderUtil', () => {
+  describe('createImageDirWithImagePath', () => {
+    it('valid existing folder 01', async () => {
+      const testPath = upath.join(__dirname, 'notRealFile.png').toString();
+      const testDir = upath.dirname(testPath);
 
-    describe('createImageDirWithImagePath', () => {
-
-        it('valid existing folder 01', async () => {
-
-            const testPath = upath.join(__dirname, 'notRealFile.png').toString();
-            const testDir = upath.dirname(testPath);
-
-            expect(await createImageDirWithImagePath(testPath)).toContain(testDir)
-        })
-
-
-        it('valid existing folder 02', async () => {
-            const testPath = upath.join(__dirname, '..', 'src', 'test', 'notRealFile.png').toString();
-            const testDir = upath.dirname(testPath);
-
-            expect(await createImageDirWithImagePath(testPath)).toBe(testDir)
-        })
-
-        it('create folder 01', async () => {
-            const testPath = upath.join(__dirname, '..', 'playground', 'folder-test', 'test-to-remove', 'notRealImage.png');
-            const testDir = upath.dirname(testPath);
-
-
-            expect(await createImageDirWithImagePath(testPath)).toBe(testDir);
-
-            // clean up created folder
-            let folderStat = await fse.stat(testDir)
-            if (folderStat.isDirectory()) {
-                await fse.rm(testDir, { recursive: true });
-            }
-        })
+      expect(await createImageDirWithImagePath(testPath)).toContain(testDir);
     });
 
-    const testPath = upath.join(__dirname, '..', 'src', 'test').toString();
-    it('makeImagePath', async () => {
+    it('valid existing folder 02', async () => {
+      const testPath = upath.join(__dirname, '..', 'src', 'test', 'notRealFile.png').toString();
+      const testDir = upath.dirname(testPath);
 
+      expect(await createImageDirWithImagePath(testPath)).toBe(testDir);
+    });
 
-        expect(await makeImagePath({
-            imageFolderPath: "docs/img",
-            fileName: 'notRealFile.png',
-            editorOpenFilePath: testPath
-        })).contain('/src/docs/img/notRealFile.png')
-    })
+    it('create folder 01', async () => {
+      const testPath = upath.join(__dirname, '..', 'playground', 'folder-test', 'test-to-remove', 'notRealImage.png');
+      const testDir = upath.dirname(testPath);
 
+      expect(await createImageDirWithImagePath(testPath)).toBe(testDir);
 
-    it('ensurePngAddedToFileName - add .png', async () => {
-        expect(ensurePngAddedToFileName('notRealFile')).toBe('notRealFile.png')
-    })
+      // clean up created folder
+      const folderStat = await fse.stat(testDir);
+      if (folderStat.isDirectory())
+        await fse.rm(testDir, { recursive: true });
+    });
+  });
 
-    it('ensurePngAddedToFileName - already had', async () => {
-        expect(ensurePngAddedToFileName('file.png')).toBe('file.png')
-    })
+  const testPath = upath.join(__dirname, '..', 'src', 'test').toString();
+  it('makeImagePath', async () => {
+    expect(await makeImagePath({
+      imageFolderPath: 'docs/img',
+      fileName: 'notRealFile.png',
+      editorOpenFilePath: testPath,
+    })).contain('/src/docs/img/notRealFile.png');
+  });
 
-    it('ensurePngAddedToFileName - already had but not lower case', async () => {
-        expect(ensurePngAddedToFileName('file.PnG')).toBe('file.PnG')
-    })
+  it('ensurePngAddedToFileName - add .png', async () => {
+    expect(ensurePngAddedToFileName('notRealFile')).toBe('notRealFile.png');
+  });
 
+  it('ensurePngAddedToFileName - already had', async () => {
+    expect(ensurePngAddedToFileName('file.png')).toBe('file.png');
+  });
 
-    it('ensureFileAndGetItsDirectory', async () => {
-        const dirName = await ensureFileAndGetItsDirectory(__filename);
-        expect(dirName).toBe(__dirname)
-    })
+  it('ensurePngAddedToFileName - already had but not lower case', async () => {
+    expect(ensurePngAddedToFileName('file.PnG')).toBe('file.PnG');
+  });
 
+  it('ensureFileAndGetItsDirectory', async () => {
+    const dirName = await ensureFileAndGetItsDirectory(__filename);
+    expect(dirName).toBe(__dirname);
+  });
 
-    it('ensureFileAndGetItsDirectory - if given directory', async () => {
+  it('ensureFileAndGetItsDirectory - if given directory', async () => {
+    await expect(ensureFileAndGetItsDirectory(__dirname)).rejects.toThrow('Not a file but instead a directory:');
+  });
 
-        await expect(ensureFileAndGetItsDirectory(__dirname)).rejects.toThrow('Not a file but instead a directory:');
-    })
+  it('ensurePathIsDirectory', async () => {
+    const dirName = await ensurePathIsDirectory(__dirname);
+    expect(dirName).toBe(__dirname);
+  });
 
+  it('ensurePathIsDirectory - if given fileName', async () => {
+    await expect(ensurePathIsDirectory(__filename)).rejects.toThrow('Path is file instead of a directory:');
+  });
 
-    it('ensurePathIsDirectory', async () => {
-        const dirName = await ensurePathIsDirectory(__dirname);
-        expect(dirName).toBe(__dirname)
-    })
+  it('ensureFileExistsOrThrow - if given valid fileName', async () => {
+    expect(await ensureFileExistsOrThrow(__filename, new MockLogger())).toBeTruthy();
+  });
 
-
-    it('ensurePathIsDirectory - if given fileName', async () => {
-
-        await expect(ensurePathIsDirectory(__filename)).rejects.toThrow('Path is file instead of a directory:');
-    })
-
-
-
-    it('ensureFileExistsOrThrow - if given valid fileName', async () => {
-
-        expect(await ensureFileExistsOrThrow(__filename, new MockLogger())).toBeTruthy();
-    })
-
-
-    it('ensureFileExistsOrThrow - if given invalid fileName', async () => {
-
-        await expect(ensureFileExistsOrThrow(upath.join(__dirname, 'not-real.txt'), new MockLogger())).rejects.toThrow('Script file not found:');
-    })
-
-})
+  it('ensureFileExistsOrThrow - if given invalid fileName', async () => {
+    await expect(ensureFileExistsOrThrow(upath.join(__dirname, 'not-real.txt'), new MockLogger())).rejects.toThrow('Script file not found:');
+  });
+});

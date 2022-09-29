@@ -3,7 +3,7 @@
   "name": "markdown-paste-image",
   "displayName": "Markdown Paste Image",
   "version": "0.0.1",
-  "packageManager": "pnpm@7.5.0",
+  "packageManager": "pnpm@7.12.2",
   "description": "Paste Image in markdown from clipboard",
   "author": "Chris Towles",
   "license": "MIT",
@@ -15,6 +15,14 @@
   "bugs": {
     "url": "https://github.com/ChrisTowles/vscode-markdown-paste-image/issues"
   },
+  "keywords": [
+    "paste",
+    "image",
+    "markdown",
+    "paste image",
+    "keybindings",
+    "markdown paste image"
+  ],
   "categories": [
     "Other"
   ],
@@ -28,44 +36,44 @@
     "vscode": "^1.71.0"
   },
   "activationEvents": [
-    "onCommand:extension.pasteImage"
+    "onCommand:extension.markdownPasteImage"
   ],
   "contributes": {
     "configuration": {
       "type": "object",
       "title": "Paste Image Configuration",
       "properties": {
-        "pasteImage.imageFolderPath": {
+        "markdownPasteImage.imageFolderPath": {
           "type": "string",
           "default": "${currentFileDir}",
           "description": "The destination to save image file.  You can use variable ${currentFileDir} and ${projectRoot}. ${currentFileDir} will be replace by the path of directory that contain current editing file. ${projectRoot} will be replace by path of the project opened in vscode."
         },
-        "pasteImage.defaultImageName": {
+        "markdownPasteImage.defaultImageName": {
           "type": "string",
           "default": "yyyy-LL-mm-HH-mm-ss",
-          "description": "The default image file name. The value of this config will be pass to the 'format' function of moment library(a js time manipulation library), you can read document https://moment.github.io/luxon/#/formatting?id=table-of-tokens for advanced usage."
+          "description": "The default image file name. The value of this config will be pass to the 'format' function of Luxon library, you can read document https://moment.github.io/luxon/#/formatting?id=table-of-tokens for usage."
         },
-        "pasteImage.imageNamePrefix": {
+        "markdownPasteImage.imageNamePrefix": {
           "type": "string",
           "default": "",
           "description": "The string prepend to the image file name."
         },
-        "pasteImage.imageNameSuffix": {
+        "markdownPasteImage.imageNameSuffix": {
           "type": "string",
           "default": "",
           "description": "The string append to the image file name."
         },
-        "pasteImage.imageUriPathPrefix": {
+        "markdownPasteImage.imageUriPathPrefix": {
           "type": "string",
           "default": "",
-          "description": "The string prepend to the resolved image upath. Can be used if you want to supply a custom domain to image url."
+          "description": "The string prepend to the resolved image path. Can be used if you want to supply a custom domain to image url."
         },
-        "pasteImage.imageUriPathSuffix": {
+        "markdownPasteImage.imageUriPathSuffix": {
           "type": "string",
           "default": "",
-          "description": "The string append to the resolved image upath. Can be used if you want to supply a custom params to image url."
+          "description": "The string append to the resolved image path. Can be used if you want to supply a custom params to image url."
         },
-        "pasteImage.encodePath": {
+        "markdownPasteImage.encodePath": {
           "type": "string",
           "enum": [
             "none",
@@ -75,17 +83,17 @@
           "default": "urlEncodeSpace",
           "description": "The string append to the image file name. How to encode image path before insert to editor. Support options: none, urlEncode, urlEncodeSpace"
         },
-        "pasteImage.insertPattern": {
+        "markdownPasteImage.insertPattern": {
           "type": "string",
           "default": "${imageSyntaxPrefix}${imageFilePath}${imageSyntaxSuffix}",
           "description": "The pattern of string that would be pasted to text."
         },
-        "pasteImage.showFilePathConfirmInputBox": {
+        "markdownPasteImage.showFilePathConfirmInputBox": {
           "type": "boolean",
           "default": true,
           "description": "Set to true if you want to be able to change the file path or name prior to saving the file to disk"
         },
-        "pasteImage.filePathConfirmInputBoxMode": {
+        "markdownPasteImage.filePathConfirmInputBoxMode": {
           "type": "string",
           "enum": [
             "fullPath",
@@ -98,26 +106,19 @@
     },
     "commands": [
       {
-        "command": "extension.pasteImage",
-        "title": "Paste Image"
+        "command": "extension.markdownPasteImage",
+        "title": "Markdown Paste Image"
       }
     ],
     "keybindings": [
       {
-        "command": "extension.pasteImage",
+        "command": "extension.markdownPasteImage",
         "key": "ctrl+alt+v",
         "mac": "cmd+alt+v",
         "when": "editorTextFocus"
       }
     ]
   },
-  "keywords": [
-    "paste",
-    "image",
-    "markdown",
-    "paste image",
-    "keybindings"
-  ],
   "scripts": {
     "build": "cross-env NODE_ENV=production tsup",
     "dev": "cross-env NODE_ENV=development tsup --watch",
@@ -127,8 +128,10 @@
     "pack": "vsce package --no-dependencies",
     "test": "vitest --reporter verbose",
     "typecheck": "tsc --noEmit",
-    "release": "bumpp --commit --push --tag && nr publish",
-    "readme": "esno ./scripts/docs.ts"
+    "release": "bumpp --commit --push --tag && nr publish"
+  },
+  "dependencies": {
+    "cross-env": "^7.0.3"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.25.2",
@@ -158,8 +161,5 @@
     "vite": "^2.9.14",
     "vitest": "^0.18.0",
     "vsce": "^2.9.2"
-  },
-  "dependencies": {
-    "cross-env": "^7.0.3"
   }
 }

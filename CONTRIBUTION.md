@@ -5,7 +5,7 @@
 1. Fork and clone the repo.
 2. Open the `Extensions` tab of VS Code.
 3. Search for `@recommended`.
-4. Make sure to install the `TypeScript + Webpack Problem Matchers` extension.
+4. Make sure to install the `TypeScript + Webpack Problem Matchers` [extension](https://marketplace.visualstudio.com/items?itemName=amodio.tsl-problem-matcher).
 5. Run `ni` (or `pnpm i`) in terminal.
 6. Press <kbd>F5</kbd> to start debugging.
 
@@ -17,15 +17,15 @@
 
 - In `OUTPUT` panel of VS Code 👇.
 
-```jsonc
-// Error: the description can't be converted into a problem matcher:
+```json5
+// Error: the description can't be converted into a problem matcher
 {
-    "base": "$ts-webpack-watch",
-    "background": {
-        "activeOnStart": true,
-        "beginsPattern": "Build start",
-        "endsPattern": "Build success"
-    }
+  "base": "$ts-webpack-watch",
+  "background": {
+    "activeOnStart": true,
+    "beginsPattern": "Build start",
+    "endsPattern": "Build success"
+  }
 }
 ```
 

@@ -1,29 +1,36 @@
-import { Configuration, EncodePathEnum } from "./configuration";
-import * as upath from 'upath';
-import { ILogger } from './logger';
-import { ensurePathIsDirectory } from "./folderUtil";
+import upath from 'upath';
+import type { Configuration } from './configuration';
+import { EncodePathEnum } from './configuration';
+import type { ILogger } from './logger';
+import { ensurePathIsDirectory } from './folderUtil';
 
 /**
      * render the image file path dependent on file type
      * e.g. in markdown image file path will render to ![](path)
      */
 
+export const getRelativePathFromEditorFile = async ({ editorOpenFolderPath, imageFilePath }:
+{ editorOpenFolderPath: string; imageFilePath: string }): Promise<string> => {
+  await ensurePathIsDirectory(editorOpenFolderPath);
 
-export const getRelativePathFromEditorFile = async ({ editorOpenFolderPath, imageFilePath, logger }: {
-    editorOpenFolderPath: string; imageFilePath: string; logger: ILogger;
-}): Promise<string> => {
+  imageFilePath = upath.relative(editorOpenFolderPath, imageFilePath);
 
-    await ensurePathIsDirectory(editorOpenFolderPath);
+  // Normalize a string path, reducing '..' and '.' parts. When multiple slashes are
+  // found, they're replaced by a single one; when the path contains a trailing slash, it
+  // is preserved. On Windows backslashes are used.
+  imageFilePath = upath.normalize(imageFilePath);
 
-    imageFilePath = upath.relative(editorOpenFolderPath, imageFilePath);
+  return imageFilePath;
+};
 
-    // Normalize a string path, reducing '..' and '.' parts. When multiple slashes are 
-    // found, they're replaced by a single one; when the path contains a trailing slash, it
-    // is preserved. On Windows backslashes are used.
-    imageFilePath = upath.normalize(imageFilePath);
+export const encodeImagePath = ({ imageFilePath, encodePath }: { imageFilePath: string; encodePath: EncodePathEnum }): string => {
+  if (encodePath === EncodePathEnum.UrlEncode)
+    imageFilePath = encodeURI(imageFilePath);
+  else if (encodePath === EncodePathEnum.UrlEncodeSpace)
+    imageFilePath = imageFilePath.replace(/ /g, '%20');
 
-    return imageFilePath;
-}
+  return imageFilePath;
+};
 
 const PATH_VARIABLE_IMAGE_FILE_PATH = /\$\{imageFilePath\}/g;
 const PATH_VARIABLE_IMAGE_ORIGINAL_FILE_PATH = /\$\{imageOriginalFilePath\}/g;
@@ -32,54 +39,40 @@ const PATH_VARIABLE_IMAGE_FILE_NAME_WITHOUT_EXT = /\$\{imageFileNameWithoutExt\}
 const PATH_VARIABLE_IMAGE_SYNTAX_PREFIX = /\$\{imageSyntaxPrefix\}/g;
 const PATH_VARIABLE_IMAGE_SYNTAX_SUFFIX = /\$\{imageSyntaxSuffix\}/g;
 
-export const renderTextWithImagePath = async ({ languageId, config, imageFilePath, logger }: { languageId: string; config: Configuration; imageFilePath: string; logger: ILogger; }): Promise<string> => {
+export const renderTextWithImagePath = async ({ languageId, config, imageFilePath }: { languageId: string; config: Configuration; imageFilePath: string; logger: ILogger }): Promise<string> => {
+  imageFilePath = await getRelativePathFromEditorFile({ editorOpenFolderPath: config.editorOpenFolderPath, imageFilePath });
+  const originalImagePath = imageFilePath;
 
-    // logger.debug(`renderFilePath start - ${imageFilePath}`);
+  const ext = upath.extname(originalImagePath);
+  const fileName = upath.basename(originalImagePath);
+  const fileNameWithoutExt = upath.basename(originalImagePath, ext);
 
-    imageFilePath = await getRelativePathFromEditorFile({ editorOpenFolderPath: config.editorOpenFolderPath, imageFilePath, logger });
-    let originalImagePath = imageFilePath;
+  imageFilePath = `${config.imageUriPathPrefix}${imageFilePath}${config.imageUriPathSuffix}`;
 
-    let ext = upath.extname(originalImagePath);
-    let fileName = upath.basename(originalImagePath);
-    let fileNameWithoutExt = upath.basename(originalImagePath, ext);
+  imageFilePath = encodeImagePath({ imageFilePath, encodePath: config.encodePath });
 
-    imageFilePath = `${config.imageUriPathPrefix}${imageFilePath}${config.imageUriPathSuffix}`;
+  let imageSyntaxPrefix = '';
+  let imageSyntaxSuffix = '';
+  switch (languageId) {
+    case 'markdown':
+      imageSyntaxPrefix = '![]('; // TODO: should we put a name there?
+      imageSyntaxSuffix = ')';
+      break;
+    // todo add html and other image syntax
+    default:
+      // do default
+      break;
+  }
 
+  let result = config.insertPattern;
+  result = result.replace(PATH_VARIABLE_IMAGE_SYNTAX_PREFIX, imageSyntaxPrefix);
+  result = result.replace(PATH_VARIABLE_IMAGE_SYNTAX_SUFFIX, imageSyntaxSuffix);
 
-    imageFilePath = encodeImagePath({ imageFilePath, encodePath: config.encodePath });
+  result = result.replace(PATH_VARIABLE_IMAGE_FILE_PATH, imageFilePath);
+  result = result.replace(PATH_VARIABLE_IMAGE_ORIGINAL_FILE_PATH, originalImagePath);
+  result = result.replace(PATH_VARIABLE_IMAGE_FILE_NAME, fileName);
+  result = result.replace(PATH_VARIABLE_IMAGE_FILE_NAME_WITHOUT_EXT, fileNameWithoutExt);
 
-    let imageSyntaxPrefix = "";
-    let imageSyntaxSuffix = ""
-    switch (languageId) {
-        case "markdown":
-            imageSyntaxPrefix = `![](`
-            imageSyntaxSuffix = `)`
-            break;
-        // todo add html and other image syntax
-        default:
-            // do default
-            break;
-    }
-
-    let result = config.insertPattern
-    result = result.replace(PATH_VARIABLE_IMAGE_SYNTAX_PREFIX, imageSyntaxPrefix);
-    result = result.replace(PATH_VARIABLE_IMAGE_SYNTAX_SUFFIX, imageSyntaxSuffix);
-
-    result = result.replace(PATH_VARIABLE_IMAGE_FILE_PATH, imageFilePath);
-    result = result.replace(PATH_VARIABLE_IMAGE_ORIGINAL_FILE_PATH, originalImagePath);
-    result = result.replace(PATH_VARIABLE_IMAGE_FILE_NAME, fileName);
-    result = result.replace(PATH_VARIABLE_IMAGE_FILE_NAME_WITHOUT_EXT, fileNameWithoutExt);
-
-    // logger.debug('renderFilePath end');
-    return result;
-}
-
-
-export const encodeImagePath = ({ imageFilePath, encodePath }: { imageFilePath: string; encodePath: EncodePathEnum; }): string => {
-    if (encodePath === EncodePathEnum.UrlEncode) {
-        imageFilePath = encodeURI(imageFilePath)
-    } else if (encodePath === EncodePathEnum.UrlEncodeSpace) {
-        imageFilePath = imageFilePath.replace(/ /g, "%20");
-    }
-    return imageFilePath;
-}
+  // logger.debug('renderFilePath end');
+  return result;
+};
