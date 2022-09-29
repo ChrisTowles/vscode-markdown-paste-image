@@ -59,7 +59,7 @@ export const parseConfigurationToConfig = async ({ projectRootDirPath, editorOpe
   const editorOpenFolderPath = await ensureFileAndGetItsDirectory(editorOpenFilePath);
 
   // Luxon Values used in ImageName = https://moment.github.io/luxon/#/formatting?id=table-of-tokens
-  let defaultImageName = configuration.get<string>(Constants.Config_DefaultImageName, 'yyyy-LL-dd-HH-mm-ss');
+  let defaultImageName = configuration.get<string>(Constants.Config_DefaultImageName, Constants.DefaultLuxonTimeStampFormat);
 
   // eslint-disable-next-line no-template-curly-in-string
   let imageFolderPath = configuration.get<string>(Constants.Config_ImageFolderPath, '${currentFileDir}');

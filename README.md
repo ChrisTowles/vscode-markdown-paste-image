@@ -10,17 +10,17 @@
 -->
 </p>
 
+<p align="center">
+Paste Image from clipboard into markdown for VS Code.<br>
+</p>
+
+<img src="https://raw.githubusercontent.com/ChrisTowles/vscode-markdown-paste-image/main/res/markdown-paste-image-preview.gif" height="150">
+
 ## Requirements
 
 - `xclip` command be required (Linux)
 - `powershell` command be required (Win32)
 - `pbpaste` command be required (Mac)
-
-<p align="center">
-Smart selection with double clicks for VS Code.<br>
-
-</p>
-`// TODO GIF`
 
 ## Usage
 
@@ -28,20 +28,16 @@ Smart selection with double clicks for VS Code.<br>
 
 ## Rules
 
-<!-- Generated from JSDocs, do not modify it directly -->
-<!--rules-->
-<!--rules-->
-
 ## Configuration
 
 All the rules are enabled by default. To disable a specific rule, set the rule to `false` in `smartClicks.rules` of your VS Code settings:
+
+Time format is configured with [Luxon](https://moment.github.io/luxon/#/formatting?id=table-of-tokens)
 
 ```jsonc
 // settings.json
 
 ```
-
-`// TODO GIF`
 
 ## VsCode Docs
 

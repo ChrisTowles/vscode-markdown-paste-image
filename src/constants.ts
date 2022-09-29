@@ -17,4 +17,6 @@ export class Constants {
 
   public static Config_ImageUriPathPrefix = 'imageUriPathPrefix';
   public static Config_ImageUriPathSuffix = 'imageUriPathSuffix';
+
+  public static DefaultLuxonTimeStampFormat = 'yyyyLLmm-HHmmss';
 }

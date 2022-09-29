@@ -41,7 +41,7 @@
   "contributes": {
     "configuration": {
       "type": "object",
-      "title": "Paste Image Configuration",
+      "title": "Markdown Paste Image Configuration",
       "properties": {
         "markdownPasteImage.imageFolderPath": {
           "type": "string",
@@ -50,7 +50,7 @@
         },
         "markdownPasteImage.defaultImageName": {
           "type": "string",
-          "default": "yyyy-LL-mm-HH-mm-ss",
+          "default": "yyyyLLmm-HHmmss",
           "description": "The default image file name. The value of this config will be pass to the 'format' function of Luxon library, you can read document https://moment.github.io/luxon/#/formatting?id=table-of-tokens for usage."
         },
         "markdownPasteImage.imageNamePrefix": {

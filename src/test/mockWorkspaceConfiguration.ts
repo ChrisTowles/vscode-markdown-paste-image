@@ -42,7 +42,7 @@ export class MockWorkspaceConfiguration implements WorkspaceConfiguration {
         result = '';
         break;
       case Constants.Config_DefaultImageName:
-        result = 'yyyy-LL-mm-HH-mm-ss';
+        result = Constants.DefaultLuxonTimeStampFormat;
         break;
       case Constants.Config_EncodePath:
         result = 'urlEncodeSpace'; // todo: enum
