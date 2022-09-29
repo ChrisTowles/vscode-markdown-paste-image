@@ -40,7 +40,6 @@
           "default": "${currentFileDir}",
           "description": "The destination to save image file.  You can use variable ${currentFileDir} and ${projectRoot}. ${currentFileDir} will be replace by the path of directory that contain current editing file. ${projectRoot} will be replace by path of the project opened in vscode."
         },
-       
         "pasteImage.defaultImageName": {
           "type": "string",
           "default": "yyyy-LL-mm-HH-mm-ss",
@@ -59,12 +58,12 @@
         "pasteImage.imageUriPathPrefix": {
           "type": "string",
           "default": "",
-          "description": "The string prepend to the resolved image path. Can be used if you want to supply a custom domain to image url."
+          "description": "The string prepend to the resolved image upath. Can be used if you want to supply a custom domain to image url."
         },
         "pasteImage.imageUriPathSuffix": {
           "type": "string",
           "default": "",
-          "description": "The string append to the resolved image path. Can be used if you want to supply a custom params to image url."
+          "description": "The string append to the resolved image upath. Can be used if you want to supply a custom params to image url."
         },
         "pasteImage.encodePath": {
           "type": "string",
@@ -126,7 +125,7 @@
     "vscode:prepublish": "nr build",
     "publish": "vsce publish --no-dependencies",
     "pack": "vsce package --no-dependencies",
-    "test": "vitest",
+    "test": "vitest --reporter verbose",
     "typecheck": "tsc --noEmit",
     "release": "bumpp --commit --push --tag && nr publish",
     "readme": "esno ./scripts/docs.ts"
@@ -143,6 +142,7 @@
     "@types/luxon": "^3.0.1",
     "@types/node": "^18.7.19",
     "@types/vscode": "^1.71.0",
+    "@vitest/ui": "^0.23.4",
     "@vscode/test-electron": "^2.1.5",
     "bumpp": "^8.2.1",
     "eslint": "^8.19.0",

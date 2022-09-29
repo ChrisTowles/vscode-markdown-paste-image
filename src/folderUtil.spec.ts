@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createImageDirWithImagePath, ensureFileAndGetItsDirectory, ensurePathIsDirectory, ensurePngAddedToFileName, makeImagePath, } from './folderUtil'
-import * as path from 'path';
+import * as upath from 'upath';
 
 import * as fse from 'fs-extra';
 
@@ -10,23 +10,23 @@ describe('FolderUtil', () => {
 
         it('valid existing folder 01', async () => {
 
-            const testPath = path.join(__dirname, 'notRealFile.png').toString();
-            const testDir = path.dirname(testPath);
+            const testPath = upath.join(__dirname, 'notRealFile.png').toString();
+            const testDir = upath.dirname(testPath);
 
             expect(await createImageDirWithImagePath(testPath)).toContain(testDir)
         })
 
 
         it('valid existing folder 02', async () => {
-            const testPath = path.join(__dirname, '..', 'src', 'test', 'notRealFile.png').toString();
-            const testDir = path.dirname(testPath);
+            const testPath = upath.join(__dirname, '..', 'src', 'test', 'notRealFile.png').toString();
+            const testDir = upath.dirname(testPath);
 
             expect(await createImageDirWithImagePath(testPath)).toBe(testDir)
         })
 
         it('create folder 01', async () => {
-            const testPath = path.join(__dirname, '..', 'playground', 'folder-test', 'test-to-remove', 'notRealImage.png').toString();
-            const testDir = path.dirname(testPath);
+            const testPath = upath.join(__dirname, '..', 'playground', 'folder-test', 'test-to-remove', 'notRealImage.png');
+            const testDir = upath.dirname(testPath);
 
 
             expect(await createImageDirWithImagePath(testPath)).toBe(testDir);
@@ -39,7 +39,7 @@ describe('FolderUtil', () => {
         })
     });
 
-    const testPath = path.join(__dirname, '..', 'src', 'test').toString();
+    const testPath = upath.join(__dirname, '..', 'src', 'test').toString();
     it('makeImagePath', async () => {
 
 
@@ -71,7 +71,7 @@ describe('FolderUtil', () => {
 
 
     it('ensureFileAndGetItsDirectory - if given directory', async () => {
-        
+
         await expect(ensureFileAndGetItsDirectory(__dirname)).rejects.toThrow('Not a file but instead a directory:');
     })
 
@@ -83,9 +83,9 @@ describe('FolderUtil', () => {
 
 
     it('ensurePathIsDirectory - if given fileName', async () => {
-        
+
         await expect(ensurePathIsDirectory(__filename)).rejects.toThrow('Path is file instead of a directory:');
     })
-    
+
 
 })

@@ -1,5 +1,4 @@
 import { Configuration, EncodePathEnum } from "./configuration";
-import * as path from 'path';
 import * as upath from 'upath';
 import { ILogger } from './logger';
 import { ensurePathIsDirectory } from "./folderUtil";
@@ -11,17 +10,18 @@ import { ensurePathIsDirectory } from "./folderUtil";
 
 
 export const getRelativePathFromEditorFile = async ({ editorOpenFolderPath, imageFilePath, logger }: {
-    editorOpenFolderPath: string;  imageFilePath: string;  logger: ILogger; }): Promise<string> => {
+    editorOpenFolderPath: string; imageFilePath: string; logger: ILogger;
+}): Promise<string> => {
 
     await ensurePathIsDirectory(editorOpenFolderPath);
 
-    imageFilePath = path.relative(editorOpenFolderPath, imageFilePath);
-    
+    imageFilePath = upath.relative(editorOpenFolderPath, imageFilePath);
+
     // Normalize a string path, reducing '..' and '.' parts. When multiple slashes are 
     // found, they're replaced by a single one; when the path contains a trailing slash, it
     // is preserved. On Windows backslashes are used.
     imageFilePath = upath.normalize(imageFilePath);
-   
+
     return imageFilePath;
 }
 
@@ -35,17 +35,17 @@ const PATH_VARIABLE_IMAGE_SYNTAX_SUFFIX = /\$\{imageSyntaxSuffix\}/g;
 export const renderTextWithImagePath = async ({ languageId, config, imageFilePath, logger }: { languageId: string; config: Configuration; imageFilePath: string; logger: ILogger; }): Promise<string> => {
 
     // logger.debug(`renderFilePath start - ${imageFilePath}`);
-    
+
     imageFilePath = await getRelativePathFromEditorFile({ editorOpenFolderPath: config.editorOpenFolderPath, imageFilePath, logger });
     let originalImagePath = imageFilePath;
 
-    let ext = path.extname(originalImagePath);
-    let fileName = path.basename(originalImagePath);
-    let fileNameWithoutExt = path.basename(originalImagePath, ext);
-    
+    let ext = upath.extname(originalImagePath);
+    let fileName = upath.basename(originalImagePath);
+    let fileNameWithoutExt = upath.basename(originalImagePath, ext);
+
     imageFilePath = `${config.imageUriPathPrefix}${imageFilePath}${config.imageUriPathSuffix}`;
 
-    
+
     imageFilePath = encodeImagePath({ imageFilePath, encodePath: config.encodePath });
 
     let imageSyntaxPrefix = "";
@@ -75,7 +75,7 @@ export const renderTextWithImagePath = async ({ languageId, config, imageFilePat
 }
 
 
-export const encodeImagePath = ({ imageFilePath, encodePath}: { imageFilePath: string; encodePath: EncodePathEnum; }): string => {
+export const encodeImagePath = ({ imageFilePath, encodePath }: { imageFilePath: string; encodePath: EncodePathEnum; }): string => {
     if (encodePath === EncodePathEnum.UrlEncode) {
         imageFilePath = encodeURI(imageFilePath)
     } else if (encodePath === EncodePathEnum.UrlEncodeSpace) {

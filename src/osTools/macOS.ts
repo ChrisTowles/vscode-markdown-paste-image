@@ -1,5 +1,5 @@
 import { spawn } from "child_process";
-import path from "path";
+import * as upath from 'upath';
 import * as fse from 'fs-extra';
 import { ILogger } from "../logger";
 import { SaveClipboardImageToFileResult } from "../dto/SaveClipboardImageToFileResult";
@@ -7,7 +7,7 @@ import { SaveClipboardImageToFileResult } from "../dto/SaveClipboardImageToFileR
 export const macCreateImageWithAppleScript = async ({ imagePath, logger }: { imagePath: string; logger: ILogger; }): Promise<SaveClipboardImageToFileResult> => {
 
     // Mac
-    let scriptPath = path.join(__dirname, '../res/mac.applescript');
+    let scriptPath = upath.join(__dirname, '../res/mac.applescript');
 
 
     if (! await fse.pathExists(scriptPath)) {
