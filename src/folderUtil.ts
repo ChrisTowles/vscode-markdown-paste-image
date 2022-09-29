@@ -58,12 +58,13 @@ export const createImageDirWithImagePath = async (imagePath: string): Promise<st
 }
 
 
-export async function ensureFileExists(scriptPath: string, logger: ILogger) {
+export async function ensureFileExistsOrThrow(scriptPath: string, logger: ILogger): Promise<boolean> {
     if (!await fse.pathExists(scriptPath)) {
         const errorMsg = `Script file not found: ${scriptPath}`;
         logger.showErrorMessage(errorMsg);
         throw new Error(errorMsg);
     }
+    return true;
 }
 
 /**

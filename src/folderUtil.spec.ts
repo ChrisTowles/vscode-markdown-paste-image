@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { createImageDirWithImagePath, ensureFileAndGetItsDirectory, ensurePathIsDirectory, ensurePngAddedToFileName, makeImagePath, } from './folderUtil'
+import { createImageDirWithImagePath, ensureFileAndGetItsDirectory, ensureFileExistsOrThrow, ensurePathIsDirectory, ensurePngAddedToFileName, makeImagePath, } from './folderUtil'
 import * as upath from 'upath';
 
 import * as fse from 'fs-extra';
+import { MockLogger } from './test/mockLogger';
 
 describe('FolderUtil', () => {
 
@@ -87,5 +88,17 @@ describe('FolderUtil', () => {
         await expect(ensurePathIsDirectory(__filename)).rejects.toThrow('Path is file instead of a directory:');
     })
 
+
+
+    it('ensureFileExistsOrThrow - if given valid fileName', async () => {
+
+        expect(await ensureFileExistsOrThrow(__filename, new MockLogger())).toBeTruthy();
+    })
+
+
+    it('ensureFileExistsOrThrow - if given invalid fileName', async () => {
+
+        await expect(ensureFileExistsOrThrow(upath.join(__dirname, 'not-real.txt'), new MockLogger())).rejects.toThrow('Script file not found:');
+    })
 
 })

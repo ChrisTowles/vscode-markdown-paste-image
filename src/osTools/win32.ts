@@ -3,14 +3,14 @@ import * as upath from 'upath';
 import * as fse from 'fs-extra';
 import { ILogger } from "../logger";
 import { SaveClipboardImageToFileResult } from "../dto/SaveClipboardImageToFileResult";
-import { ensureFileExists } from "../folderUtil";
+import { ensureFileExistsOrThrow } from "../folderUtil";
 
 export const win32CreateImageWithPowershell = async ({ imagePath, logger }: { imagePath: string; logger: ILogger; }): Promise<SaveClipboardImageToFileResult> => {
 
     // Windows
     const scriptPath = upath.join(__dirname, '../res/windows.ps1');
 
-    await ensureFileExists(scriptPath, logger);
+    await ensureFileExistsOrThrow(scriptPath, logger);
 
     return new Promise<SaveClipboardImageToFileResult>(async (resolve, reject) => {
 
