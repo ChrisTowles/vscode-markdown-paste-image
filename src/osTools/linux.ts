@@ -3,15 +3,12 @@ import * as upath from 'upath';
 import * as fse from 'fs-extra';
 import { ILogger } from "../logger";
 import { SaveClipboardImageToFileResult } from "../dto/SaveClipboardImageToFileResult";
+import { ensureFileExists } from "../folderUtil";
 
 export const linuxCreateImageWithXClip = async ({ imagePath, logger }: { imagePath: string; logger: ILogger; }): Promise<SaveClipboardImageToFileResult> => {
     let scriptPath = upath.join(__dirname, '../res/linux.sh');
 
-    if (! await fse.pathExists(scriptPath)) {
-        const errorMsg = `Script file not found: ${scriptPath}`
-        logger.showErrorMessage(errorMsg);
-        throw new Error(errorMsg);
-    }
+    await ensureFileExists(scriptPath, logger);
 
     return new Promise<SaveClipboardImageToFileResult>((resolve, reject) => {
 
@@ -54,4 +51,6 @@ export const linuxCreateImageWithXClip = async ({ imagePath, logger }: { imagePa
             outputData += data.toString().trim() + '\n';
         });
     });
+
+
 }

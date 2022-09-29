@@ -1,6 +1,7 @@
 
 import * as upath from 'upath';
 import * as fse from 'fs-extra';
+import { ILogger } from './logger';
 
 
 export const ensureFileAndGetItsDirectory = async (filePath: string): Promise<string> => {
@@ -54,6 +55,15 @@ export const createImageDirWithImagePath = async (imagePath: string): Promise<st
 
     return imageDir;
 
+}
+
+
+export async function ensureFileExists(scriptPath: string, logger: ILogger) {
+    if (!await fse.pathExists(scriptPath)) {
+        const errorMsg = `Script file not found: ${scriptPath}`;
+        logger.showErrorMessage(errorMsg);
+        throw new Error(errorMsg);
+    }
 }
 
 /**

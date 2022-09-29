@@ -22,7 +22,8 @@ on run argv
 			return ""
 		end try
 	else
-		return "no image"
+		do shell script "echo 'warning: no image in clipboard'"
+		error "warning: no image in clipboard" number -1
 	end if
 end run
 

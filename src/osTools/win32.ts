@@ -3,17 +3,14 @@ import * as upath from 'upath';
 import * as fse from 'fs-extra';
 import { ILogger } from "../logger";
 import { SaveClipboardImageToFileResult } from "../dto/SaveClipboardImageToFileResult";
+import { ensureFileExists } from "../folderUtil";
 
 export const win32CreateImageWithPowershell = async ({ imagePath, logger }: { imagePath: string; logger: ILogger; }): Promise<SaveClipboardImageToFileResult> => {
 
     // Windows
     const scriptPath = upath.join(__dirname, '../res/windows.ps1');
 
-    if (! await fse.pathExists(scriptPath)) {
-        const errorMsg = `Script file not found: ${scriptPath}`
-        logger.showErrorMessage(`Script file not found: ${scriptPath}`);
-        throw new Error(errorMsg);
-    }
+    await ensureFileExists(scriptPath, logger);
 
     return new Promise<SaveClipboardImageToFileResult>(async (resolve, reject) => {
 
