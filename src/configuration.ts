@@ -10,7 +10,7 @@ export interface Configuration {
     readonly imageFolderPath: string;
 
 
-    readonly insertPatternConfig: string;
+    readonly insertPattern: string;
     readonly showFilePathConfirmInputBox: boolean,
     readonly filePathConfirmInputBoxMode: FilePathConfirmInputBoxModeEnum;
     readonly encodePath: EncodePathEnum;
@@ -51,7 +51,7 @@ export const parseConfigurationToConfig = async ({ projectRootDirPath, editorOpe
       
 
     let encodePath = configuration.get<EncodePathEnum>(Constants.Config_EncodePath, EncodePathEnum.UrlEncodeSpace);
-    let insertPatternConfig = configuration.get<string>(Constants.Config_InsertPattern, '');
+    let insertPattern = configuration.get<string>(Constants.Config_InsertPattern, '');
 
 
     let imageUriPathPrefix = configuration.get<string>(Constants.Config_ImageUriPathPrefix, '');
@@ -73,7 +73,7 @@ export const parseConfigurationToConfig = async ({ projectRootDirPath, editorOpe
     imageFolderPath = replacePathVariable({ pathStr: imageFolderPath, projectRootDirPath: projectRootDirPath, editorOpenFilePath: editorOpenFilePath });
     imageNamePrefix = replacePathVariable({ pathStr: imageNamePrefix, projectRootDirPath: projectRootDirPath, editorOpenFilePath: editorOpenFilePath });
     imageNameSuffix = replacePathVariable({ pathStr: imageNameSuffix, projectRootDirPath: projectRootDirPath, editorOpenFilePath: editorOpenFilePath });
-    insertPatternConfig = replacePathVariable({ pathStr: insertPatternConfig, projectRootDirPath: projectRootDirPath, editorOpenFilePath: editorOpenFilePath });
+    insertPattern = replacePathVariable({ pathStr: insertPattern, projectRootDirPath: projectRootDirPath, editorOpenFilePath: editorOpenFilePath });
 
     
     const config: Configuration = {
@@ -84,7 +84,7 @@ export const parseConfigurationToConfig = async ({ projectRootDirPath, editorOpe
 
         encodePath: encodePath,
         
-        insertPatternConfig: insertPatternConfig,
+        insertPattern: insertPattern,
         showFilePathConfirmInputBox: showFilePathConfirmInputBox,
         filePathConfirmInputBoxMode: filePathConfirmInputBoxMode,
         

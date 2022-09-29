@@ -14,7 +14,6 @@ describe('Configuration', () => {
 
     it('check parse of default values', async () => {
 
-     
         const config = await parseConfigurationToConfig({
             projectRootDirPath: __dirname,
             editorOpenFilePath: __filename,

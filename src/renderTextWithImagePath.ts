@@ -34,7 +34,7 @@ const PATH_VARIABLE_IMAGE_SYNTAX_SUFFIX = /\$\{imageSyntaxSuffix\}/g;
 
 export const renderTextWithImagePath = async ({ languageId, config, imageFilePath, logger }: { languageId: string; config: Configuration; imageFilePath: string; logger: ILogger; }): Promise<string> => {
 
-    logger.debug(`renderFilePath start - ${imageFilePath}`);
+    // logger.debug(`renderFilePath start - ${imageFilePath}`);
     
     imageFilePath = await getRelativePathFromEditorFile({ editorOpenFolderPath: config.editorOpenFolderPath, imageFilePath, logger });
     let originalImagePath = imageFilePath;
@@ -55,13 +55,13 @@ export const renderTextWithImagePath = async ({ languageId, config, imageFilePat
             imageSyntaxPrefix = `![](`
             imageSyntaxSuffix = `)`
             break;
-        case "asciidoc":
-            imageSyntaxPrefix = `image::`
-            imageSyntaxSuffix = `[]`
+        // todo add html and other image syntax
+        default:
+            // do default
             break;
     }
 
-    let result = config.insertPatternConfig
+    let result = config.insertPattern
     result = result.replace(PATH_VARIABLE_IMAGE_SYNTAX_PREFIX, imageSyntaxPrefix);
     result = result.replace(PATH_VARIABLE_IMAGE_SYNTAX_SUFFIX, imageSyntaxSuffix);
 
@@ -70,7 +70,7 @@ export const renderTextWithImagePath = async ({ languageId, config, imageFilePat
     result = result.replace(PATH_VARIABLE_IMAGE_FILE_NAME, fileName);
     result = result.replace(PATH_VARIABLE_IMAGE_FILE_NAME_WITHOUT_EXT, fileNameWithoutExt);
 
-    logger.debug('renderFilePath end');
+    // logger.debug('renderFilePath end');
     return result;
 }
 

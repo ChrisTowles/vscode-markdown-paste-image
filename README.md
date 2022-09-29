@@ -10,9 +10,16 @@
 -->
 </p>
 
+## Requirements
+
+- `xclip` command be required (Linux)
+- `powershell` command be required (Win32)
+- `pbpaste` command be required (Mac)
+
 <p align="center">
 Smart selection with double clicks for VS Code.<br>
 
+</p>
 `// TODO GIF`
 
 ## Usage

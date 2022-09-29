@@ -34,7 +34,7 @@ describe('FolderUtil', () => {
             // clean up created folder
             let folderStat = await fse.stat(testDir)
             if (folderStat.isDirectory()) {
-                await fse.rmdir(testDir, { recursive: true });
+                await fse.rm(testDir, { recursive: true });
             }
         })
     });
