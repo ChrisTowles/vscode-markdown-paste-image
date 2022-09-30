@@ -1,5 +1,5 @@
 {
-  "publisher": "ChrisTowles",
+  "publisher": "chris-towles",
   "name": "markdown-paste-image",
   "displayName": "Markdown Paste Image",
   "version": "0.0.1",
@@ -130,9 +130,6 @@
     "typecheck": "tsc --noEmit",
     "release": "bumpp --commit --push --tag && nr publish"
   },
-  "dependencies": {
-    "cross-env": "^7.0.3"
-  },
   "devDependencies": {
     "@antfu/eslint-config": "^0.25.2",
     "@antfu/ni": "^0.16.3",
@@ -148,6 +145,7 @@
     "@vitest/ui": "^0.23.4",
     "@vscode/test-electron": "^2.1.5",
     "bumpp": "^8.2.1",
+    "cross-env": "^7.0.3",
     "eslint": "^8.19.0",
     "esno": "^0.16.3",
     "fast-glob": "^3.2.11",
