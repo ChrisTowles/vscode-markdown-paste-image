@@ -36,9 +36,24 @@ There are other plugins that had this feature, but they were not maintained, had
 
 ## Requirements
 
-- `xclip` command be required (Linux)
-- `powershell` command be required (Win32)
-- `pbpaste` command be required (Mac)
+### Linux
+
+`xclip` command is required (Linux)
+
+Example on Ubuntu
+
+```bash
+sudo apt-get update -y
+sudo apt-get install xclip
+```
+
+### Windows
+
+`powershell` command be required (Win32)
+
+### Mac
+
+`pbpaste` command be required (Mac)
 
 _____
 
@@ -49,10 +64,9 @@ Below are the options you can set in your `settings.json` file.
 <!--config-options-->
 ### Image Folder Path
 
-The destination to save image file. 
+The destination to save image file.
 
 You can use variable `${currentFileDir}` and `${projectRoot}`. `${currentFileDir}` will be replaced by the path of directory that contain current editing file. `${projectRoot}` will be replaced by path of the project opened in vscode.
-
 
 ```jsonc
 {
@@ -63,9 +77,10 @@ You can use variable `${currentFileDir}` and `${projectRoot}`. `${currentFileDir
 
 ### Default Image Name
 
-The default image file name. The value of this config will be pass to the 'format' function of Luxon library, you can read document https://moment.github.io/luxon/#/formatting?id=table-of-tokens for usage. 
+The default image file name. The value of this config will be pass to the 'format' function of Luxon library, you can read document <https://moment.github.io/luxon/#/formatting?id=table-of-tokens> for usage.
 If you have text selected, it will be used as the file name instead.
 
+test
 
 ```jsonc
 {
@@ -78,7 +93,6 @@ If you have text selected, it will be used as the file name instead.
 
 The string prepended to the image file name.
 
-
 ```jsonc
 {
    // ... other settings.json
@@ -89,7 +103,6 @@ The string prepended to the image file name.
 ### Image Name Suffix
 
 The string appended to the image file name.
-
 
 ```jsonc
 {
@@ -102,7 +115,6 @@ The string appended to the image file name.
 
 The string prepended to the resolved image path. Can be used if you want to supply a custom domain to image url.
 
-
 ```jsonc
 {
    // ... other settings.json
@@ -113,7 +125,6 @@ The string prepended to the resolved image path. Can be used if you want to supp
 ### Image Uri Path Suffix
 
 The string appended to the resolved image path. Can be used if you want to supply a custom parameters to image url.
-
 
 ```jsonc
 {
@@ -139,7 +150,6 @@ The string appended to the image file name. How to encode image path before inse
 
 The pattern of string that would be pasted to text.
 
-
 ```jsonc
 {
    // ... other settings.json
@@ -150,7 +160,6 @@ The pattern of string that would be pasted to text.
 ### Show File Path Confirm Input Box
 
 Set to true if you want to be able to change the file path or name prior to saving the file to disk
-
 
 ```jsonc
 {

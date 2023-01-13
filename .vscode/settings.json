@@ -2,5 +2,6 @@
   "cSpell.words": [
     "luxon",
     "upath"
-  ]
+  ],
+  "markdownPasteImage.imageFolderPath": "${projectRoot}/docs/images"
 }
