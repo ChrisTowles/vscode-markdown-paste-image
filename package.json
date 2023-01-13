@@ -2,7 +2,7 @@
   "publisher": "chris-towles",
   "name": "markdown-paste-image",
   "displayName": "Markdown Paste Image",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "packageManager": "pnpm@7.12.2",
   "description": "Paste Image in markdown from clipboard",
   "author": "Chris Towles",
@@ -130,7 +130,6 @@
     "typecheck": "tsc --noEmit",
     "readme": "esno ./scripts/update-readme.ts",
     "release": "bumpp --commit --push --tag && nr publish"
-    
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.25.2",
