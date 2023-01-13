@@ -46,32 +46,32 @@
         "markdownPasteImage.imageFolderPath": {
           "type": "string",
           "default": "${currentFileDir}",
-          "description": "The destination to save image file.  You can use variable ${currentFileDir} and ${projectRoot}. ${currentFileDir} will be replace by the path of directory that contain current editing file. ${projectRoot} will be replace by path of the project opened in vscode."
+          "description": "The destination to save image file. \n\nYou can use variable `${currentFileDir}` and `${projectRoot}`. `${currentFileDir}` will be replaced by the path of directory that contain current editing file. `${projectRoot}` will be replaced by path of the project opened in vscode."
         },
         "markdownPasteImage.defaultImageName": {
           "type": "string",
           "default": "yyyyLLmm-HHmmss",
-          "description": "The default image file name. The value of this config will be pass to the 'format' function of Luxon library, you can read document https://moment.github.io/luxon/#/formatting?id=table-of-tokens for usage."
+          "description": "The default image file name. The value of this config will be pass to the 'format' function of Luxon library, you can read document https://moment.github.io/luxon/#/formatting?id=table-of-tokens for usage. \nIf you have text selected, it will be used as the file name instead."
         },
         "markdownPasteImage.imageNamePrefix": {
           "type": "string",
           "default": "",
-          "description": "The string prepend to the image file name."
+          "description": "The string prepended to the image file name."
         },
         "markdownPasteImage.imageNameSuffix": {
           "type": "string",
           "default": "",
-          "description": "The string append to the image file name."
+          "description": "The string appended to the image file name."
         },
         "markdownPasteImage.imageUriPathPrefix": {
           "type": "string",
           "default": "",
-          "description": "The string prepend to the resolved image path. Can be used if you want to supply a custom domain to image url."
+          "description": "The string prepended to the resolved image path. Can be used if you want to supply a custom domain to image url."
         },
         "markdownPasteImage.imageUriPathSuffix": {
           "type": "string",
           "default": "",
-          "description": "The string append to the resolved image path. Can be used if you want to supply a custom params to image url."
+          "description": "The string appended to the resolved image path. Can be used if you want to supply a custom parameters to image url."
         },
         "markdownPasteImage.encodePath": {
           "type": "string",
@@ -81,7 +81,7 @@
             "urlEncodeSpace"
           ],
           "default": "urlEncodeSpace",
-          "description": "The string append to the image file name. How to encode image path before insert to editor. Support options: none, urlEncode, urlEncodeSpace"
+          "description": "The string appended to the image file name. How to encode image path before insert to editor."
         },
         "markdownPasteImage.insertPattern": {
           "type": "string",
@@ -128,7 +128,9 @@
     "pack": "vsce package --no-dependencies",
     "test": "vitest --reporter verbose",
     "typecheck": "tsc --noEmit",
+    "readme": "esno ./scripts/update-readme.ts",
     "release": "bumpp --commit --push --tag && nr publish"
+    
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.25.2",

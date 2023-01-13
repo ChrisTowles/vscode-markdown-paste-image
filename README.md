@@ -40,26 +40,143 @@ There are other plugins that had this feature, but they were not maintained, had
 - `powershell` command be required (Win32)
 - `pbpaste` command be required (Mac)
 
-## Usage
-
-`// TODO`
+_____
 
 ## Configuration
 
-Time format is configured with [Luxon](https://moment.github.io/luxon/#/formatting?id=table-of-tokens)
+Below are the options you can set in your `settings.json` file.
+
+<!--config-options-->
+### Image Folder Path
+
+The destination to save image file. 
+
+You can use variable `${currentFileDir}` and `${projectRoot}`. `${currentFileDir}` will be replaced by the path of directory that contain current editing file. `${projectRoot}` will be replaced by path of the project opened in vscode.
+
 
 ```jsonc
-// settings.json
-
-// TODO!
-
+{
+   // ... other settings.json
+   "markdownPasteImage.imageFolderPath" : "${currentFileDir}"
+}
 ```
+
+### Default Image Name
+
+The default image file name. The value of this config will be pass to the 'format' function of Luxon library, you can read document https://moment.github.io/luxon/#/formatting?id=table-of-tokens for usage. 
+If you have text selected, it will be used as the file name instead.
+
+
+```jsonc
+{
+   // ... other settings.json
+   "markdownPasteImage.defaultImageName" : "yyyyLLmm-HHmmss"
+}
+```
+
+### Image Name Prefix
+
+The string prepended to the image file name.
+
+
+```jsonc
+{
+   // ... other settings.json
+   "markdownPasteImage.imageNamePrefix" : ""
+}
+```
+
+### Image Name Suffix
+
+The string appended to the image file name.
+
+
+```jsonc
+{
+   // ... other settings.json
+   "markdownPasteImage.imageNameSuffix" : ""
+}
+```
+
+### Image Uri Path Prefix
+
+The string prepended to the resolved image path. Can be used if you want to supply a custom domain to image url.
+
+
+```jsonc
+{
+   // ... other settings.json
+   "markdownPasteImage.imageUriPathPrefix" : ""
+}
+```
+
+### Image Uri Path Suffix
+
+The string appended to the resolved image path. Can be used if you want to supply a custom parameters to image url.
+
+
+```jsonc
+{
+   // ... other settings.json
+   "markdownPasteImage.imageUriPathSuffix" : ""
+}
+```
+
+### Encode Path
+
+The string appended to the image file name. How to encode image path before insert to editor.
+
+ **Possible Values:** `none`, `urlEncode`, `urlEncodeSpace`
+
+```jsonc
+{
+   // ... other settings.json
+   "markdownPasteImage.encodePath" : "urlEncodeSpace"
+}
+```
+
+### Insert Pattern
+
+The pattern of string that would be pasted to text.
+
+
+```jsonc
+{
+   // ... other settings.json
+   "markdownPasteImage.insertPattern" : "${imageSyntaxPrefix}${imageFilePath}${imageSyntaxSuffix}"
+}
+```
+
+### Show File Path Confirm Input Box
+
+Set to true if you want to be able to change the file path or name prior to saving the file to disk
+
+
+```jsonc
+{
+   // ... other settings.json
+   "markdownPasteImage.showFilePathConfirmInputBox" : "true"
+}
+```
+
+### File Path Confirm Input Box Mode
+
+Set the mode of file path confirm input box
+
+ **Possible Values:** `fullPath`, `onlyName`
+
+```jsonc
+{
+   // ... other settings.json
+   "markdownPasteImage.filePathConfirmInputBoxMode" : "fullPath"
+}
+```
+<!--config-options-->
 
 ## VsCode Publish
 
 - [Micrsoft Publisher UI](https://marketplace.visualstudio.com/manage/publishers/)
 - [VsCode API Docs](https://code.visualstudio.com/api/references/activation-events)
--
 
 ## Credits
 
