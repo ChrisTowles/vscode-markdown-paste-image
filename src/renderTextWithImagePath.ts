@@ -1,7 +1,7 @@
 import upath from 'upath';
 import type { Configuration } from './configuration';
 import { EncodePathEnum } from './configuration';
-import type { ILogger } from './logger';
+
 import { ensurePathIsDirectory } from './folderUtil';
 
 /**
@@ -24,11 +24,19 @@ export const getRelativePathFromEditorFile = async ({ editorOpenFolderPath, imag
 };
 
 export const encodeImagePath = ({ imageFilePath, encodePath }: { imageFilePath: string; encodePath: EncodePathEnum }): string => {
-  if (encodePath === EncodePathEnum.UrlEncode)
-    imageFilePath = encodeURI(imageFilePath);
-  else if (encodePath === EncodePathEnum.UrlEncodeSpace)
-    imageFilePath = imageFilePath.replace(/ /g, '%20');
-
+  switch (encodePath) {
+    case EncodePathEnum.UrlEncode:
+      imageFilePath = encodeURI(imageFilePath);
+      break;
+    case EncodePathEnum.UrlEncodeSpace:
+      imageFilePath = encodeURI(imageFilePath);
+      imageFilePath = imageFilePath.replaceAll(' ', '-');
+      imageFilePath = imageFilePath.replaceAll('%20', '-');
+      break;
+    case EncodePathEnum.None:
+    default:
+      break;
+  }
   return imageFilePath;
 };
 

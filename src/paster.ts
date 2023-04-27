@@ -10,7 +10,7 @@ import type { ILogger } from './logger';
 import { linuxCreateImageWithXClip } from './osTools/linux';
 import { macCreateImageWithAppleScript } from './osTools/macOS';
 import { win32CreateImageWithPowershell } from './osTools/win32';
-import { renderTextWithImagePath } from './renderTextWithImagePath';
+import { encodeImagePath, renderTextWithImagePath } from './renderTextWithImagePath';
 
 export class Paster {
   public static async paste(logger: ILogger): Promise<void> {
@@ -133,6 +133,7 @@ export class Paster {
 
     // add prefix and suffix
     imageFileName = config.imageNamePrefix + imageFileName + config.imageNameSuffix;
+    imageFileName = encodeImagePath({ imageFilePath: imageFileName, encodePath: config.encodePath });
 
     // ensure ends with ".png"
     imageFileName = ensurePngAddedToFileName(imageFileName);

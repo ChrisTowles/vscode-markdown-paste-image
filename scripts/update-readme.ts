@@ -11,6 +11,7 @@ async function run() {
     title = title.charAt(0).toUpperCase() + title.slice(1);
 
     const desc = properties[key].description;
+    const type = properties[key].type;
     const defaultValue = properties[key].default;
 
     let enumValues = [] as string[];
@@ -22,13 +23,17 @@ async function run() {
     entryContent.push('');
     entryContent.push(`${desc}`);
     entryContent.push('');
-    if (enumValues.length > 0)
+    if (enumValues.length > 0) {
       entryContent.push(` **Possible Values:** ${enumValues.map(i => `\`${i}\``).join(', ')}`);
-    entryContent.push('');
+      entryContent.push('');
+    }
     entryContent.push('```jsonc');
     entryContent.push('{');
     entryContent.push('   // ... other settings.json');
-    entryContent.push(`   "${key}" : "${defaultValue}"`);
+    if (type === 'boolean')
+      entryContent.push(`   "${key}" : ${defaultValue}`);
+    else
+      entryContent.push(`   "${key}" : "${defaultValue}"`);
     entryContent.push('}');
     entryContent.push('```');
 

@@ -64,7 +64,7 @@ Below are the options you can set in your `settings.json` file.
 <!--config-options-->
 ### Image Folder Path
 
-The destination to save image file.
+The destination to save image file. 
 
 You can use variable `${currentFileDir}` and `${projectRoot}`. `${currentFileDir}` will be replaced by the path of directory that contain current editing file. `${projectRoot}` will be replaced by path of the project opened in vscode.
 
@@ -77,10 +77,8 @@ You can use variable `${currentFileDir}` and `${projectRoot}`. `${currentFileDir
 
 ### Default Image Name
 
-The default image file name. The value of this config will be pass to the 'format' function of Luxon library, you can read document <https://moment.github.io/luxon/#/formatting?id=table-of-tokens> for usage.
+The default image file name. The value of this config will be pass to the 'format' function of Luxon library, you can read document https://moment.github.io/luxon/#/formatting?id=table-of-tokens for usage. 
 If you have text selected, it will be used as the file name instead.
-
-test
 
 ```jsonc
 {
@@ -164,7 +162,7 @@ Set to true if you want to be able to change the file path or name prior to savi
 ```jsonc
 {
    // ... other settings.json
-   "markdownPasteImage.showFilePathConfirmInputBox" : "true"
+   "markdownPasteImage.showFilePathConfirmInputBox" : true
 }
 ```
 

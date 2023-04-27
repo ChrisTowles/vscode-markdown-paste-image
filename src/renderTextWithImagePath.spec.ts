@@ -106,7 +106,7 @@ describe('renderInsertTextWithImagePath', () => {
     const imagePath = upath.join(projectRootDir, 'playground', 'test icon root.png');
     const result = encodeImagePath({ imageFilePath: imagePath, encodePath: EncodePathEnum.UrlEncodeSpace });
 
-    expect(result).toContain('test%20icon%20root.png');
+    expect(result).toContain('test-icon-root.png');
   });
 
   it('encodeImagePath - UrlEncode without spaces', async () => {
