@@ -1,7 +1,7 @@
 import upath from 'upath';
 import type { Configuration } from './configuration';
 import { EncodePathEnum } from './configuration';
-
+import type { ILogger } from './logger';
 import { ensurePathIsDirectory } from './folderUtil';
 
 /**
