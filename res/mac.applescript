@@ -1,4 +1,4 @@
-property fileTypes : {{Çclass PNGfÈ, ".png"}}
+property fileTypes : {{Â«class PNGfÂ», ".png"}}
 
 on run argv
 	if argv is {} then
