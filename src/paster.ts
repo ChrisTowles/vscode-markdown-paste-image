@@ -5,9 +5,9 @@ import type { Configuration } from './configuration';
 import { FilePathConfirmInputBoxModeEnum, parseConfigurationToConfig } from './configuration';
 import { Constants } from './constants';
 import type { SaveClipboardImageToFileResult } from './dto/SaveClipboardImageToFileResult';
-import { createImageDirWithImagePath, ensurePngAddedToFileName, makeImagePath } from './folderUtil';
+import { createImageDirWithImagePath, ensureImageExtensionAddedToFileName, makeImagePath } from './folderUtil';
 import type { ILogger } from './logger';
-import { linuxCreateImageWithXClip } from './osTools/linux';
+import { linuxCreateImageWithClipboard } from './osTools/linux';
 import { macCreateImageWithAppleScript } from './osTools/macOS';
 import { win32CreateImageWithPowershell } from './osTools/win32';
 import { encodeImagePath, renderTextWithImagePath } from './renderTextWithImagePath';
@@ -63,6 +63,12 @@ export class Paster {
 
     // replace variable in config
     const imagePath = await this.getImagePath({ editorOpenFilePath, selectText, config, logger });
+    
+    // Check if user cancelled the operation (empty path)
+    if (!imagePath) {
+      return;
+    }
+    
     try {
       // is the file existed?
       const fileAlreadyExisted = await fse.existsSync(imagePath);
@@ -94,6 +100,10 @@ export class Paster {
 
       if (result.success) {
         logger.debug(`saveClipboardImageToFileAndGetPath - ${result.imagePath} }`);
+        // Use the actual image path returned by the script (which may have a different extension)
+        if (result.imagePath) {
+          imagePath = result.imagePath;
+        }
       }
       else {
         if (result.noImageInClipboard)
@@ -135,8 +145,8 @@ export class Paster {
     imageFileName = config.imageNamePrefix + imageFileName + config.imageNameSuffix;
     imageFileName = encodeImagePath({ imageFilePath: imageFileName, encodePath: config.encodePath });
 
-    // ensure ends with ".png"
-    imageFileName = ensurePngAddedToFileName(imageFileName);
+    // ensure ends with an image extension (defaulting to ".png")
+    imageFileName = ensureImageExtensionAddedToFileName(imageFileName);
 
     let filePathOrName;
     if (config.filePathConfirmInputBoxMode === FilePathConfirmInputBoxModeEnum.FullPath)
@@ -151,13 +161,17 @@ export class Paster {
       });
 
       if (userEnteredFileName) {
-        userEnteredFileName = ensurePngAddedToFileName(userEnteredFileName);
+        userEnteredFileName = ensureImageExtensionAddedToFileName(userEnteredFileName);
 
         logger.debug(`userEnteredFileName          = ${userEnteredFileName}`);
         if (config.filePathConfirmInputBoxMode === FilePathConfirmInputBoxModeEnum.OnlyName)
           filePathOrName = makeImagePath({ fileName: userEnteredFileName, imageFolderPath: config.imageFolderPath, editorOpenFilePath });
         else
           filePathOrName = userEnteredFileName;
+      }
+      else {
+        // User cancelled the input box
+        return '';
       }
     }
     else {
@@ -190,7 +204,7 @@ export class Paster {
     }
     else {
       // Linux
-      result = await linuxCreateImageWithXClip({ imagePath, logger });
+      result = await linuxCreateImageWithClipboard({ imagePath, logger });
     }
     logger.log(`createImage result = ${JSON.stringify(result, null, 2)}`);
     return result;

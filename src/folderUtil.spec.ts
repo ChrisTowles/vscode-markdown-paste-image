@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import * as upath from 'upath';
 
 import * as fse from 'fs-extra';
-import { createImageDirWithImagePath, ensureFileAndGetItsDirectory, ensureFileExistsOrThrow, ensurePathIsDirectory, ensurePngAddedToFileName, makeImagePath } from './folderUtil';
+import { createImageDirWithImagePath, ensureFileAndGetItsDirectory, ensureFileExistsOrThrow, ensureImageExtensionAddedToFileName, ensurePathIsDirectory, ensurePngAddedToFileName, makeImagePath } from './folderUtil';
 import { MockLogger } from './test/mockLogger';
 
 describe('FolderUtil', () => {
@@ -53,6 +53,34 @@ describe('FolderUtil', () => {
 
   it('ensurePngAddedToFileName - already had but not lower case', async () => {
     expect(ensurePngAddedToFileName('file.PnG')).toBe('file.PnG');
+  });
+
+  it('ensureImageExtensionAddedToFileName - add default .png extension', async () => {
+    expect(ensureImageExtensionAddedToFileName('test')).toBe('test.png');
+  });
+
+  it('ensureImageExtensionAddedToFileName - already has .png extension', async () => {
+    expect(ensureImageExtensionAddedToFileName('test.png')).toBe('test.png');
+  });
+
+  it('ensureImageExtensionAddedToFileName - already has .jpg extension', async () => {
+    expect(ensureImageExtensionAddedToFileName('test.jpg')).toBe('test.jpg');
+  });
+
+  it('ensureImageExtensionAddedToFileName - already has .jpeg extension', async () => {
+    expect(ensureImageExtensionAddedToFileName('test.jpeg')).toBe('test.jpeg');
+  });
+
+  it('ensureImageExtensionAddedToFileName - already has .gif extension', async () => {
+    expect(ensureImageExtensionAddedToFileName('test.gif')).toBe('test.gif');
+  });
+
+  it('ensureImageExtensionAddedToFileName - add custom default extension', async () => {
+    expect(ensureImageExtensionAddedToFileName('test', '.jpg')).toBe('test.jpg');
+  });
+
+  it('ensureImageExtensionAddedToFileName - case insensitive extension check', async () => {
+    expect(ensureImageExtensionAddedToFileName('test.PNG')).toBe('test.PNG');
   });
 
   it('ensureFileAndGetItsDirectory', async () => {

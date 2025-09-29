@@ -11,5 +11,7 @@ node_modules
 temp
 *.vsix
 
+# Generated from package.json5
+package.json
 
 playground/*.png

@@ -61,6 +61,18 @@ export const ensurePngAddedToFileName = (userEnteredFileName: string): string =>
   return userEnteredFileName;
 };
 
+export const ensureImageExtensionAddedToFileName = (userEnteredFileName: string, defaultExtension: string = '.png'): string => {
+  const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.tiff', '.tif'];
+  const hasImageExtension = imageExtensions.some(ext => 
+    userEnteredFileName.toLowerCase().endsWith(ext)
+  );
+  
+  if (!hasImageExtension) {
+    userEnteredFileName += defaultExtension;
+  }
+  return userEnteredFileName;
+};
+
 export const makeImagePath = ({ imageFolderPath, fileName, editorOpenFilePath }: { imageFolderPath: string; fileName: string; editorOpenFilePath: string }): string => {
   // image output path
   const folderPath = upath.dirname(editorOpenFilePath);

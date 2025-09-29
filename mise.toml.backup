@@ -1,0 +1,10 @@
+[tools]
+just = "latest"
+node = "lts"
+python = "latest"
+
+[settings]
+legacy_version_file = false
+#use_global_config = false
+#use_parent_config = false
+override_config_filenames = ["exact-mise.toml"]
