@@ -130,6 +130,8 @@ export class Paster {
     else
       // luxon DateTime
       imageFileName = DateTime.now().toFormat(config.defaultImageName);
+    // remove whitespace from the image name before generating file name
+    imageFileName = imageFileName.replace(/\s/g, '');
 
     // add prefix and suffix
     imageFileName = config.imageNamePrefix + imageFileName + config.imageNameSuffix;
